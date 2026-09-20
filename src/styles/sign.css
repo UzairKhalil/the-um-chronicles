@@ -1,0 +1,251 @@
+/* ==========================================================================
+   The Sign
+   ========================================================================== */
+
+.sign {
+  display: block;
+  width: min(74vw, 17rem);
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold-deep);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.6s var(--ease);
+}
+
+.sign--done { cursor: default; }
+
+.sign:active:not(.sign--done) { transform: scale(0.97); }
+
+.sign__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* the faint outline that is always there */
+.sign__ghost {
+  stroke: rgba(243, 227, 214, 0.14);
+  fill: none;
+}
+
+/* the infinity ribbon woven behind the heart */
+.sign__ribbon {
+  fill: none;
+  opacity: 0.3;
+  stroke-dasharray: 360;
+  stroke-dashoffset: 360;
+  animation: drawRibbon 4.5s var(--ease) 0.4s forwards;
+}
+
+@keyframes drawRibbon {
+  to { stroke-dashoffset: 0; }
+}
+
+/* each half, drawn in when its person signs */
+.sign__half {
+  fill: none;
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  opacity: 0;
+  transition: stroke-dashoffset 1.6s var(--ease), opacity 0.7s var(--ease);
+}
+
+.sign__half.is-signed {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+/* the bloom: only once both halves are signed */
+.sign__bloom {
+  fill: none;
+  opacity: 0;
+  transform-origin: 100px 95px;
+  transition: opacity 1.2s var(--ease);
+}
+
+.sign--bloomed .sign__bloom {
+  opacity: 0.55;
+  animation: breathe 5.5s ease-in-out 0.6s infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.32; transform: scale(1); }
+  50%      { opacity: 0.68; transform: scale(1.035); }
+}
+
+/* sparks around the bloom */
+.sign__sparks circle {
+  fill: var(--gold);
+  opacity: 0;
+  transform-origin: 100px 95px;
+}
+
+.sign--bloomed .sign__sparks circle {
+  animation: spark 4.8s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.42s + 0.8s);
+}
+
+@keyframes spark {
+  0%, 70%, 100% { opacity: 0; transform: scale(0.4); }
+  18%           { opacity: 0.85; transform: scale(1); }
+  40%           { opacity: 0.15; transform: scale(0.7); }
+}
+
+/* while a signature is being written */
+.sign--pending { animation: pulseSign 1.4s ease-in-out infinite; }
+
+@keyframes pulseSign {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.58; }
+}
+
+/* --------------------------------------------------------- the sign screen */
+
+.sign-screen { text-align: center; }
+
+.sign-stage {
+  position: relative;
+  padding: 1.1rem 0 0.4rem;
+}
+
+/* a soft halo behind the whole sign once it has bloomed */
+.sign-stage::before {
+  content: '';
+  position: absolute;
+  inset: 8% 4% 12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 48%,
+    rgba(232, 192, 125, 0.2) 0%,
+    rgba(226, 169, 160, 0.1) 36%,
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity 1.6s var(--ease);
+  pointer-events: none;
+}
+
+.sign-stage.is-bloomed::before { opacity: 1; }
+
+.sign-status {
+  margin-top: 1.5rem;
+  font-size: 1.02rem;
+  color: var(--ink-dim);
+  min-height: 1.6em;
+}
+
+.sign-status strong {
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.sign-prompt {
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* the two names under the sign, one per half */
+.sign-halves {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 19rem;
+  margin: 1.6rem auto 0;
+}
+
+.sign-half {
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-ghost);
+  transition: color 0.8s var(--ease);
+  min-width: 0;
+}
+
+.sign-half small {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
+  color: var(--ink-ghost);
+  transition: color 0.8s var(--ease);
+}
+
+.sign-half.is-signed { color: var(--cream); }
+.sign-half.is-signed small { color: var(--ink-faint); }
+
+.sign-halves__tie {
+  width: 1px;
+  height: 1.9rem;
+  background: linear-gradient(180deg, transparent, var(--line-strong), transparent);
+}
+
+/* the note each of us can leave with a signature */
+.sign-note {
+  margin: 1.9rem auto 0;
+  max-width: 24rem;
+  text-align: left;
+}
+
+.sign-note__lines {
+  margin: 1.6rem auto 0;
+  max-width: 24rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.sign-line {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background: rgba(243, 227, 214, 0.03);
+  text-align: left;
+}
+
+.sign-line__who {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.sign-line__text {
+  font-style: italic;
+  color: var(--ink-dim);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* the line of poetry that appears on a bloomed day */
+.bloom-line {
+  margin: 1.9rem auto 0;
+  max-width: 24rem;
+  font-family: var(--script);
+  font-size: clamp(1.3rem, 6.4vw, 1.7rem);
+  line-height: 1.6;
+  color: var(--gold);
+  opacity: 0;
+  animation: fadeIn 2s var(--ease) 0.9s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sign__ribbon { stroke-dashoffset: 0; animation: none; }
+  .sign__half { transition: opacity 0.001ms; }
+  .sign__half.is-signed { stroke-dashoffset: 0; }
+  .sign--bloomed .sign__bloom { animation: none; opacity: 0.5; }
+  .sign--bloomed .sign__sparks circle { animation: none; opacity: 0.4; }
+  .sign--pending { animation: none; opacity: 0.6; }
+}

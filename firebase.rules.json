@@ -1,0 +1,66 @@
+{
+  "//": "THIS IS THE UMC FRAGMENT ONLY — DO NOT PASTE IT OVER THE LIVE RULES.",
+  "//1": "Rules are per-database, and this database is shared with another app.",
+  "//2": "Publishing this file as-is would delete that app's rules and break it.",
+  "//3": "Open the Firebase console, copy the LIVE ruleset, add the \"umc\" key",
+  "//4": "below into its \"rules\" object alongside whatever is already there,",
+  "//5": "and publish the merged result. See MERGED-EXAMPLE below.",
+
+  "rules": {
+    "umc": {
+      ".read": true,
+      ".write": true,
+
+      "days": {
+        "$day": {
+          ".validate": "$day.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+          "$person": {
+            ".validate": "$person === 'u' || $person === 'm'",
+            "at": { ".validate": "newData.isNumber()" },
+            "note": { ".validate": "newData.isString() && newData.val().length <= 240" },
+            "device": { ".validate": "newData.isString()" },
+            "$other": { ".validate": false }
+          }
+        }
+      },
+
+      "comments": {
+        "$item": {
+          "$id": {
+            ".validate": "newData.hasChildren(['name', 'text', 'at']) && newData.child('name').val().length > 0 && newData.child('text').val().length > 0",
+            "name": { ".validate": "newData.isString() && newData.val().length <= 60" },
+            "text": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+            "at": { ".validate": "newData.isNumber()" },
+            "personId": { ".validate": "newData.isString()" },
+            "device": {}
+          }
+        }
+      },
+
+      "reactions": {
+        "$item": {
+          "$person": {
+            ".validate": "$person === 'u' || $person === 'm'",
+            "symbol": { ".validate": "newData.val() === 'heart' || newData.val() === 'rose' || newData.val() === 'spark'" },
+            "at": { ".validate": "newData.isNumber()" },
+            "name": { ".validate": "newData.isString()" },
+            "device": {}
+          }
+        }
+      },
+
+      "signIns": {
+        "$id": {
+          "at": { ".validate": "newData.isNumber()" },
+          "name": { ".validate": "newData.isString()" },
+          "personId": { ".validate": "newData.isString()" },
+          "device": {}
+        }
+      },
+
+      "devices": {
+        "$deviceId": {}
+      }
+    }
+  }
+}

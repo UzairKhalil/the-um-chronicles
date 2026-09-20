@@ -1,0 +1,59 @@
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Settings → Pages → Source MUST be set to "GitHub Actions".
+# Left on "Deploy from a branch", GitHub runs its own workflow alongside this
+# one, the two race, and the raw repository gets published instead of the
+# built app about half the time.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys run at once; never cancel one mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gen-version.js stamps the build with the short commit sha.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          # Pinned, and deliberately the same version the tests were verified
+          # on locally. package.json engines says >=22.12.0, which is what
+          # Vite 7 and Vitest 3 actually require — anything lower installs
+          # cleanly and then fails at test time. If you raise this, raise
+          # engines too, and vice versa.
+          node-version: '24.15.0'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

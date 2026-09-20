@@ -1,0 +1,244 @@
+/* ==========================================================================
+   The Chronicle
+   ========================================================================== */
+
+.stats {
+  margin-top: 2.2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.stats__item {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1rem 0.65rem;
+  text-align: center;
+  background: linear-gradient(168deg, rgba(243, 227, 214, 0.045), rgba(243, 227, 214, 0.01));
+}
+
+.stats__n {
+  display: block;
+  font-size: 1.85rem;
+  line-height: 1;
+  color: var(--gold);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.stats__l {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  line-height: 1.4;
+}
+
+.chronicle__first { margin-top: 1.2rem; }
+
+.chronicle__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.4rem;
+}
+
+.chronicle__empty { margin: 2.4rem auto; max-width: 22rem; }
+
+/* ------------------------------------------------------------------ toggle */
+
+.toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px;
+  background: rgba(18, 8, 16, 0.4);
+}
+
+.toggle__btn {
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  font-family: var(--serif);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), background-color 0.3s var(--ease);
+  min-height: 2.1rem;
+}
+
+.toggle__btn.is-on {
+  color: var(--night);
+  background: linear-gradient(140deg, var(--rose), var(--gold));
+}
+
+/* ----------------------------------------------------------------- entries */
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* the thread running down the left of the list */
+.entries::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--line-strong) 8%, var(--line-strong) 92%, transparent);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 11px 1fr;
+  gap: 0.95rem;
+  padding: 0.85rem 0;
+  animation: riseIn 0.6s var(--ease) both;
+}
+
+.entry__mark {
+  position: relative;
+  padding-top: 0.55rem;
+}
+
+.entry__dot {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, var(--rose), var(--wine-soft));
+  box-shadow: 0 0 0 3px rgba(226, 169, 160, 0.1);
+}
+
+.entry__body { min-width: 0; }
+
+.entry__date {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--cream);
+  letter-spacing: 0.015em;
+}
+
+.entry__n {
+  margin: 0.15rem 0 0;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.entry__note {
+  margin: 0.55rem 0 0;
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.entry__who {
+  display: inline-block;
+  font-style: normal;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-right: 0.5rem;
+  opacity: 0.85;
+}
+
+/* ---------------------------------------------------------------- calendar */
+
+.months { display: grid; gap: 2.1rem; }
+
+.month__name {
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.7rem;
+}
+
+.month__week,
+.month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.month__week {
+  margin-bottom: 5px;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-ghost);
+  text-align: center;
+}
+
+.month__day {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 0.45rem;
+  border: 1px solid transparent;
+  background: rgba(243, 227, 214, 0.035);
+  font-size: 0.62rem;
+  color: var(--ink-ghost);
+  font-variant-numeric: tabular-nums;
+}
+
+.month__day.is-full {
+  background: radial-gradient(circle at 36% 30%, rgba(232, 192, 125, 0.85), rgba(107, 33, 69, 0.9));
+  color: var(--night);
+  border-color: rgba(232, 192, 125, 0.4);
+}
+
+.month__day.is-half {
+  background: rgba(226, 169, 160, 0.08);
+  border-color: rgba(226, 169, 160, 0.4);
+  color: var(--ink-faint);
+}
+
+.month__day.is-today { box-shadow: 0 0 0 2px var(--accent-soft); }
+.month__day.is-future { opacity: 0.35; }
+
+.month__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  justify-content: center;
+  letter-spacing: 0.08em;
+}
+
+.month__key span { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+.key-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: rgba(243, 227, 214, 0.06);
+  border: 1px solid transparent;
+}
+
+.key-dot.is-full {
+  background: radial-gradient(circle at 36% 30%, rgba(232, 192, 125, 0.85), rgba(107, 33, 69, 0.9));
+}
+
+.key-dot.is-half {
+  background: rgba(226, 169, 160, 0.08);
+  border-color: rgba(226, 169, 160, 0.4);
+}
+
+@media (min-width: 26rem) {
+  .stats { grid-template-columns: repeat(4, 1fr); }
+  .stats__n { font-size: 1.6rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry { animation: none; }
+}

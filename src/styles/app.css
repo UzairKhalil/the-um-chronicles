@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Shell, masthead, navigation, tallies
+   ========================================================================== */
+
+.app { min-height: 100svh; }
+
+.app__main { margin-top: 2.2rem; }
+
+.app__foot {
+  margin-top: 3.5rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  letter-spacing: 0.14em;
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+.masthead { text-align: center; }
+
+.masthead__title {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.masthead__title .title { display: block; }
+.masthead__title .subtitle { display: block; }
+
+.masthead__page {
+  margin-top: 1rem;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.masthead__row {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.masthead__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.masthead__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.masthead__note {
+  margin-top: 0.9rem;
+  color: var(--rose);
+  opacity: 0.72;
+  letter-spacing: 0.04em;
+}
+
+/* -------------------------------------------------------------- navigation */
+
+.nav {
+  margin-top: 2.6rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2.6rem;
+}
+
+/* ------------------------------------------------------------------ tally */
+
+.tally {
+  margin-top: 2.4rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.tally__item {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.05rem 0.7rem;
+  text-align: center;
+  background: linear-gradient(168deg, rgba(243, 227, 214, 0.045), rgba(243, 227, 214, 0.01));
+}
+
+.tally__n {
+  display: block;
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--gold);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.tally__l {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  line-height: 1.45;
+}
+
+.sign-screen__wait { margin-top: 1.7rem; font-size: 1rem; }
+.sign-screen__quote { margin-top: 0; }
+.sign-screen__when { margin-top: 1rem; }
+
+.sign-note__open { margin-bottom: 0.9rem; }
+.sign-note__go { margin-top: 0.9rem; }
+.sign-note__box { min-height: 3.6rem; }
+
+@media (min-width: 40rem) {
+  .nav { grid-template-columns: 1fr 1fr; }
+}

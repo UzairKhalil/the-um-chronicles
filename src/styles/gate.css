@@ -1,0 +1,133 @@
+/* ==========================================================================
+   The gate
+   ========================================================================== */
+
+.gate {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+.gate--opening {
+  opacity: 0;
+  transform: scale(1.04);
+}
+
+.gate__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.1rem;
+  text-align: center;
+  padding-block: 3rem;
+}
+
+.gate__head { text-align: center; }
+
+.gate__quote {
+  max-width: 22rem;
+  font-size: 1.05rem;
+}
+
+.gate__form {
+  width: 100%;
+  max-width: 19rem;
+  position: relative;
+}
+
+.code {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  cursor: text;
+}
+
+.code__slot {
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: rgba(18, 8, 16, 0.42);
+  transition: border-color 0.4s var(--ease), background-color 0.4s var(--ease),
+              box-shadow 0.4s var(--ease);
+}
+
+.code__slot.is-filled {
+  border-color: rgba(226, 169, 160, 0.5);
+  background: rgba(226, 169, 160, 0.08);
+}
+
+.code__slot.is-next {
+  border-color: rgba(232, 192, 125, 0.55);
+  box-shadow: 0 0 0 3px rgba(232, 192, 125, 0.07);
+}
+
+.code__dot {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--rose);
+  animation: fadeIn 0.3s var(--ease) both;
+}
+
+/* The real input sits invisibly over the slots so the phone keyboard and
+   autofill behave normally; the slots above are only a picture of it. */
+.code__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  font-size: 16px; /* anything smaller and iOS zooms the page on focus */
+  caret-color: transparent;
+  cursor: text;
+}
+
+.code__input:focus { outline: none; }
+
+.gate__form.is-wrong { animation: shake 0.5s var(--ease); }
+
+@keyframes shake {
+  0%, 100%   { transform: translateX(0); }
+  15%, 55%   { transform: translateX(-7px); }
+  35%, 75%   { transform: translateX(7px); }
+  90%        { transform: translateX(-2px); }
+}
+
+.gate__error,
+.gate__hint {
+  margin-top: 0.9rem;
+  text-align: center;
+  min-height: 1.4em;
+}
+
+.gate__hint {
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.gate__foot {
+  max-width: 24rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.gate__privacy {
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.gate__offline {
+  line-height: 1.6;
+  color: var(--rose);
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gate__form.is-wrong { animation: none; }
+  .gate--opening { transform: none; }
+}
