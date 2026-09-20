@@ -5,3 +5,6 @@ dist
 .env
 .env.*
 public/version.json
+
+# dev-only scratch harness, never committed
+public/_devframe.html

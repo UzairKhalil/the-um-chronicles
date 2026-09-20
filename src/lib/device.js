@@ -124,7 +124,9 @@ export async function describeDevice() {
     model: parseModel(ua),
     platform: nav.platform || '',
     mobile: null,
-    ua,
+    // Capped: the ruleset rejects a user agent longer than 400 characters,
+    // and a rejected field fails the whole write.
+    ua: ua.slice(0, 400),
     language: nav.language || '',
     languages: Array.isArray(nav.languages) ? nav.languages.slice(0, 4).join(', ') : '',
     timeZone: '',

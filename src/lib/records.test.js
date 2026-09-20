@@ -139,3 +139,26 @@ describe('sign-ins', () => {
     expect(dev.lastPersonId).toBe('m')
   })
 })
+
+describe('keeping the database bounded', () => {
+  it('leaves a small number of sign-ins alone', async () => {
+    const signIns = {}
+    for (let i = 0; i < 5; i += 1) signIns[`k${i}`] = { at: i, personId: 'u' }
+    fake.__seed({ signIns })
+    expect(await records.trimSignIns()).toBe(0)
+    expect(Object.keys(fake.__tree().signIns)).toHaveLength(5)
+  })
+
+  it('drops the oldest once past the cap, keeping the newest 300', async () => {
+    const signIns = {}
+    for (let i = 0; i < 310; i += 1) signIns[`k${i}`] = { at: i, personId: 'u' }
+    fake.__seed({ signIns })
+    expect(await records.trimSignIns()).toBe(10)
+    const left = fake.__tree().signIns
+    expect(Object.keys(left)).toHaveLength(300)
+    expect(left.k0).toBeUndefined()
+    expect(left.k9).toBeUndefined()
+    expect(left.k10).toBeTruthy()
+    expect(left.k309).toBeTruthy()
+  })
+})

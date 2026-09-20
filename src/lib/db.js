@@ -278,7 +278,16 @@ const firebaseAdapter = {
   },
 }
 
-const adapter = isConfigured ? firebaseAdapter : localAdapter
+// ?local=1 forces the local adapter even when a config is present. It exists
+// so the "no database reachable" path can be exercised in a real browser
+// rather than only in tests — that fallback is a requirement, and an
+// untested fallback is not a fallback.
+const forcedLocal =
+  typeof location !== 'undefined' && /(?:\?|&)local=1(?:&|$)/.test(location.search)
+
+if (forcedLocal) status = 'local'
+
+const adapter = isConfigured && !forcedLocal ? firebaseAdapter : localAdapter
 
 // ===========================================================================
 // public interface — always namespaced

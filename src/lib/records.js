@@ -13,9 +13,13 @@
 // may not contain . # $ [ ] or / — a colon is fine.
 // ---------------------------------------------------------------------------
 
-import { push, set, remove, transact, serverNow, update } from './db.js'
+import { push, set, remove, transact, serverNow, update, get } from './db.js'
 import { describeDevice } from './device.js'
 import { today } from './day.js'
+
+// Sign-ins accumulate forever otherwise. The client trims the oldest after
+// each write, the same way the other app in this database does.
+const SIGNIN_CAP = 300
 
 // The device snapshot costs a Client Hints round trip; take it once.
 let devicePromise = null
@@ -47,6 +51,20 @@ export async function recordSignIn(person) {
   const at = serverNow()
   await push('signIns', { personId: person.id, name: person.name, at, device })
   await touchDevice(device, person.id)
+  await trimSignIns().catch(() => {})
+}
+
+/** Drop the oldest sign-ins once there are more than SIGNIN_CAP of them. */
+export async function trimSignIns() {
+  const all = await get('signIns')
+  const keys = Object.keys(all || {})
+  if (keys.length <= SIGNIN_CAP) return 0
+  const oldest = keys
+    .map((key) => ({ key, at: all[key]?.at || 0 }))
+    .sort((a, b) => a.at - b.at)
+    .slice(0, keys.length - SIGNIN_CAP)
+  await Promise.all(oldest.map(({ key }) => remove(`signIns/${key}`)))
+  return oldest.length
 }
 
 /**

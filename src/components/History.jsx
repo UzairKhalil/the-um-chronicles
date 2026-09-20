@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { byId } from '../content/people.js'
 import { useDbValue } from '../hooks/useDb.js'
 import { deviceLabel } from '../lib/device.js'
 import { formatStamp, timeAgo } from '../lib/day.js'
@@ -262,7 +263,7 @@ export default function History({ onClose }) {
           {deviceRows.map((d) => (
             <tr key={d.key}>
               <th scope="row" className="is-pinned">
-                {d.lastPersonId || '—'}
+                {byId(d.lastPersonId)?.name || d.lastPersonId || '—'}
               </th>
               <td>{formatStamp(d.firstAt)}</td>
               <td title={timeAgo(d.lastAt)}>{formatStamp(d.lastAt)}</td>
