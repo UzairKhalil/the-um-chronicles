@@ -133,10 +133,19 @@ Deliberate. The seat is remembered until someone signs out by hand.
    390×780.
 8. **Clean up test data.** If you write to the live database while testing,
    delete exactly what you wrote and confirm nothing else went with it.
+9. **A write the rules rejected is not a write that died.** The Firebase SDK
+   keeps rejected writes queued in the tab and retries them — so a signature
+   refused while the rules were missing landed in real data the moment the
+   rules were published, minutes later and with no browser open on that page.
+   Before publishing rules, stop the dev server and close every tab running
+   the app, or the first thing the new rules permit is a backlog of test
+   writes. Use `?local=1` for browser testing and the live database never
+   comes into it.
 
 ## Deploying
 
-Push to `main`. The workflow tests, builds and publishes.
+Push to `master` (this repository's default branch). The workflow tests,
+builds and publishes.
 
 * **Settings → Pages → Source must be "GitHub Actions".** On "Deploy from a
   branch", GitHub runs its own workflow alongside this one, the two race, and

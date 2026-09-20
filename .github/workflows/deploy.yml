@@ -2,7 +2,9 @@ name: Test and deploy
 
 on:
   push:
-    branches: [main]
+    # This repository's default branch is master. main is listed too so a
+    # future rename does not silently stop deploying.
+    branches: [master, main]
   workflow_dispatch:
 
 # Settings → Pages → Source MUST be set to "GitHub Actions".

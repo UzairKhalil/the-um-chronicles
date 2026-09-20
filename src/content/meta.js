@@ -13,7 +13,7 @@ export const meta = {
 
   // >>> FILL THIS IN <<<  Appears under the title once signed in.
   // Anything works: 'Since 14 March 2021', 'Since the winter of 2019'.
-  since: 'Since ___',
+  since: 'Since 24 March 2024',
 
   // The button that opens the poetry page.
   poetryLabel: "Uzair's Love for Maryam",
