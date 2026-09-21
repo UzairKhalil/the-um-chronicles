@@ -14,8 +14,8 @@ vi.mock('./device.js', () => ({
 const records = await import('./records.js')
 const { today } = await import('./day.js')
 
-const uzair = { id: 'u', name: 'Uzair', admin: true }
-const maryam = { id: 'm', name: 'Maryam', admin: false }
+const uzair = { id: 'u', partner: true, name: 'Uzair', admin: true }
+const maryam = { id: 'm', partner: true, name: 'Maryam', admin: false }
 
 beforeEach(() => {
   fake.__seed({})
@@ -160,5 +160,32 @@ describe('keeping the database bounded', () => {
     expect(left.k9).toBeUndefined()
     expect(left.k10).toBeTruthy()
     expect(left.k309).toBeTruthy()
+  })
+})
+
+describe('a guest', () => {
+  const guest = { id: 'g', partner: false, name: 'Guest', admin: false }
+
+  it('cannot sign, and nothing is written', async () => {
+    await expect(records.signToday(guest)).rejects.toThrow(/partners/)
+    expect(fake.transact).not.toHaveBeenCalled()
+    expect(fake.__tree().days).toBeUndefined()
+  })
+
+  it('cannot react, and nothing is written', async () => {
+    await expect(records.toggleReaction('poem:x', guest, 'heart')).rejects.toThrow(/partners/)
+    expect(fake.__tree().reactions).toBeUndefined()
+  })
+
+  it('can leave a comment', async () => {
+    await records.addComment('poem:x', { name: 'Guest', text: 'Beautiful.', personId: 'g' })
+    const stored = Object.values(fake.__tree().comments['poem:x'])[0]
+    expect(stored.personId).toBe('g')
+    expect(stored.text).toBe('Beautiful.')
+  })
+
+  it('has its sign-in recorded like anyone else', async () => {
+    await records.recordSignIn(guest)
+    expect(Object.values(fake.__tree().signIns)[0].name).toBe('Guest')
   })
 })

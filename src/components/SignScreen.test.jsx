@@ -16,8 +16,8 @@ vi.mock('../lib/device.js', () => ({
 const SignScreen = (await import('./SignScreen.jsx')).default
 const { today } = await import('../lib/day.js')
 
-const uzair = { id: 'u', name: 'Uzair', admin: true, accent: '#E2A9A0', accentSoft: 'x' }
-const maryam = { id: 'm', name: 'Maryam', admin: false, accent: '#E8C07D', accentSoft: 'x' }
+const uzair = { id: 'u', partner: true, name: 'Uzair', admin: true, accent: '#E2A9A0', accentSoft: 'x' }
+const maryam = { id: 'm', partner: true, name: 'Maryam', admin: false, accent: '#E8C07D', accentSoft: 'x' }
 
 const show = (seat) => render(<SignScreen seat={seat} onBusy={() => {}} onGo={() => {}} />)
 const sign = async (user) => user.click(screen.getByRole('button', { name: /^sign today$/i }))
@@ -121,5 +121,37 @@ describe('the sign', () => {
     await sign(user)
     await waitFor(() => expect(fake.__tree().days[today()].m).toBeTruthy())
     expect(fake.__tree().days[today()].u).toBeUndefined()
+  })
+})
+
+describe('a guest', () => {
+  const guest = { id: 'g', partner: false, name: 'Guest', admin: false, accent: '#B9A7D6', accentSoft: 'x' }
+
+  it('sees the Sign but cannot sign it', () => {
+    show(guest)
+    expect(screen.queryByRole('button', { name: /^sign today$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /leave a line/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /touch to sign/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/neither has signed today/i)).toBeInTheDocument()
+  })
+
+  it('is told who has signed and who is awaited', () => {
+    fake.__seed({ days: { [today()]: { u: { at: 1, note: '' } } } })
+    show(guest)
+    expect(screen.getByText(/has signed\. waiting for maryam/i)).toHaveTextContent('Uzair')
+  })
+
+  it('watches the bloom when both have signed', () => {
+    fake.__seed({ days: { [today()]: { u: { at: 1 }, m: { at: 2 } } } })
+    show(guest)
+    expect(screen.getByText(/they have both signed today/i)).toBeInTheDocument()
+    expect(document.querySelector('.sign--bloomed')).not.toBeNull()
+    expect(screen.getByText(/day they both signed/i)).toBeInTheDocument()
+  })
+
+  it('sees the lines the two of them left', () => {
+    fake.__seed({ days: { [today()]: { u: { at: 1, note: 'A good day.' }, m: { at: 2 } } } })
+    show(guest)
+    expect(screen.getByText('A good day.')).toBeInTheDocument()
   })
 })

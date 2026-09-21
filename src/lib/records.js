@@ -28,6 +28,13 @@ export function deviceSnapshot() {
   return devicePromise
 }
 
+// Signing and reacting belong to the two partners. The database rules say the
+// same ('u' or 'm' only), but a guest's write would otherwise sit queued in
+// the SDK — see CLAUDE.md rule 9 — so it is refused here, before it is made.
+function requirePartner(person, action) {
+  if (!person?.partner) throw new Error(`Only the two partners can ${action}.`)
+}
+
 export const poemItemId = (id) => `poem:${id}`
 export const quoteItemId = (key) => `quote:${key}`
 
@@ -73,6 +80,7 @@ export async function trimSignIns() {
  * Runs as a transaction — two devices can be doing this at the same moment.
  */
 export async function signToday(person, note = '') {
+  requirePartner(person, 'sign')
   const day = today()
   const device = await deviceSnapshot()
   const at = serverNow()
@@ -125,6 +133,7 @@ export async function deleteComment(itemId, key) {
  * write depends on the value already there.
  */
 export async function toggleReaction(itemId, person, symbol) {
+  requirePartner(person, 'react')
   const device = await deviceSnapshot()
   const at = serverNow()
   const res = await transact(`reactions/${itemId}/${person.id}`, (current) => {

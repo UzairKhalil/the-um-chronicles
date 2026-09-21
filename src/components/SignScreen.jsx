@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import TheSign from './TheSign.jsx'
 import Interstitial from './Interstitial.jsx'
 import meta from '../content/meta.js'
-import people, { otherThan } from '../content/people.js'
+import { partners, otherThan } from '../content/people.js'
 import { sign as signQuotes, bloom as bloomLines, waiting as waitingLines } from '../content/quotes.js'
 import { pick, pickBy } from '../lib/pick.js'
 import { signToday } from '../lib/records.js'
@@ -10,7 +10,8 @@ import { useDbValue } from '../hooks/useDb.js'
 import { summarise } from '../lib/chronicle.js'
 import { today, formatDayLong, timeAgo } from '../lib/day.js'
 
-const [LEFT_PERSON, RIGHT_PERSON] = people
+// The two halves of the Sign. A guest watches; only partners draw a half.
+const [LEFT_PERSON, RIGHT_PERSON] = partners
 
 export default function SignScreen({ seat, onBusy, onGo }) {
   const [days, daysLoaded] = useDbValue('days')
@@ -30,6 +31,11 @@ export default function SignScreen({ seat, onBusy, onGo }) {
   const leftSigned = Boolean(record?.[LEFT_PERSON.id])
   const rightSigned = Boolean(record?.[RIGHT_PERSON.id])
   const bloomed = leftSigned && rightSigned
+
+  // A guest sees the Sign but has no half of it to sign.
+  const isPartner = Boolean(seat.partner)
+  const canSign = isPartner && !mine
+  const anyNote = partners.some((p) => record?.[p.id]?.note)
 
   // Both the quote and the bloom line are chosen from the day, so they stay
   // the same all day on both phones instead of reshuffling on every render.
@@ -62,6 +68,14 @@ export default function SignScreen({ seat, onBusy, onGo }) {
 
   const status = (() => {
     if (!daysLoaded) return <span className="faint">…</span>
+    if (!isPartner) {
+      if (bloomed) return <>They have both signed today.</>
+      if (leftSigned || rightSigned) {
+        const [done, waiting] = leftSigned ? [LEFT_PERSON, RIGHT_PERSON] : [RIGHT_PERSON, LEFT_PERSON]
+        return <><strong>{done.name}</strong> has signed. Waiting for {waiting.name}.</>
+      }
+      return <>Neither has signed today.</>
+    }
     if (bloomed) return <>You have both signed today.</>
     if (mine && other) return <>Waiting for <strong>{other.name}</strong>.</>
     if (theirs && other)
@@ -77,15 +91,17 @@ export default function SignScreen({ seat, onBusy, onGo }) {
           rightSigned={rightSigned}
           bloomed={bloomed}
           pending={pending}
-          disabled={Boolean(mine) || pending}
-          onSign={mine ? undefined : doSign}
-          label={mine ? 'You have signed today' : meta.signPrompt}
+          disabled={!canSign || pending}
+          onSign={canSign ? doSign : undefined}
+          label={
+            !isPartner ? 'The Sign for today' : mine ? 'You have signed today' : meta.signPrompt
+          }
         />
       </div>
 
       <p className="sign-status">{status}</p>
 
-      {!mine ? (
+      {canSign ? (
         <p className="sign-prompt">{pending ? 'signing…' : meta.signPrompt}</p>
       ) : (
         <p className="sign-prompt">{formatDayLong(day)}</p>
@@ -106,7 +122,7 @@ export default function SignScreen({ seat, onBusy, onGo }) {
       {bloomed ? <p className="bloom-line">{bloomLine}</p> : null}
 
       {/* the optional line left with a signature */}
-      {!mine ? (
+      {canSign ? (
         <div className="sign-note">
           {noteOpen ? (
             <label className="field">
@@ -142,9 +158,9 @@ export default function SignScreen({ seat, onBusy, onGo }) {
       {failed ? <p className="error">{failed}</p> : null}
 
       {/* the lines we each left today */}
-      {(mine?.note || theirs?.note) && (
+      {anyNote && (
         <div className="sign-note__lines">
-          {people.map((p) => {
+          {partners.map((p) => {
             const rec = record?.[p.id]
             if (!rec?.note) return null
             return (
@@ -157,7 +173,7 @@ export default function SignScreen({ seat, onBusy, onGo }) {
         </div>
       )}
 
-      {!bloomed && (mine || theirs) ? (
+      {isPartner && !bloomed && (mine || theirs) ? (
         <p className="quote quote--centred sign-screen__wait">{waitLine}</p>
       ) : null}
 
@@ -169,7 +185,7 @@ export default function SignScreen({ seat, onBusy, onGo }) {
         <div className="tally__item">
           <span className="tally__n">{stats.total}</span>
           <span className="tally__l">
-            day{stats.total === 1 ? '' : 's'} you both signed
+            day{stats.total === 1 ? '' : 's'} {isPartner ? 'you' : 'they'} both signed
           </span>
         </div>
         <div className="tally__item">

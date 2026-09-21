@@ -61,6 +61,25 @@ passer-by, not anyone who opens devtools.
 `quotes.js → gate` is shown before a code is entered, so those lines must not
 contain either person's name. Everywhere else is fine.
 
+### Two partners and a guest
+
+`people.js` holds three seats. `partner: true` marks the two people the Sign
+belongs to (`u`, `m`); `g` is a guest.
+
+* A day enters the Chronicle when **both partners** sign it. `chronicle.js`
+  and the Sign's two halves read `partners`, never the whole `people` list —
+  counting every seat would require the guest to sign too, and no day would
+  ever count again.
+* A guest can read everything and leave comments. A guest cannot sign or
+  react: the buttons are hidden or disabled, and `records.js` refuses the
+  write before it is made. The Firebase rules only accept `'u'` or `'m'`
+  under `days` and `reactions`, so a guest write would be rejected — and a
+  rejected write sits queued in the SDK (rule 9), which is why it is stopped
+  client-side first.
+* Giving the guest reactions means adding `'g'` to the `reactions` rule and
+  republishing — the rules are shared with another app, so merge, never
+  replace.
+
 ### Urdu
 
 * `dir="rtl" lang="ur"` goes on the poem element only, never on `<html>` — the

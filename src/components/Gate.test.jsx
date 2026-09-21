@@ -51,6 +51,20 @@ describe('the gate', () => {
     expect(onEnter.mock.calls[0][0].id).toBe('m')
   })
 
+  it('opens for the guest code', async () => {
+    const user = userEvent.setup()
+    const onEnter = vi.fn()
+    render(<Gate onEnter={onEnter} status="online" />)
+    await type(user, '10101')
+    await waitFor(() => expect(onEnter).toHaveBeenCalled(), { timeout: 2000 })
+    expect(onEnter.mock.calls[0][0]).toMatchObject({
+      id: 'g',
+      name: 'Guest',
+      partner: false,
+      admin: false,
+    })
+  })
+
   it('refuses a wrong code, kindly, and does not open', async () => {
     const user = userEvent.setup()
     const onEnter = vi.fn()

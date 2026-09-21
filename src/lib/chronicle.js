@@ -5,10 +5,11 @@
 // (they are true, and the Sign shows them) but they are not entries.
 // ---------------------------------------------------------------------------
 
-import people from '../content/people.js'
+import { partners } from '../content/people.js'
 import { today as serverToday, shiftDay, daysBetween } from './day.js'
 
-const ids = () => people.map((p) => p.id)
+// Only the two partners count. A guest is never needed to complete a day.
+const ids = () => partners.map((p) => p.id)
 
 /** Did everyone sign this day's record? */
 export function isComplete(dayRecord) {

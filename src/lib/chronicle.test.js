@@ -95,3 +95,13 @@ describe('byMonth', () => {
     expect(months[0].items).toHaveLength(2)
   })
 })
+
+describe('with a guest in the people list', () => {
+  it('still counts a day on the two partners alone', () => {
+    expect(isComplete({ u: { at: 1 }, m: { at: 2 } })).toBe(true)
+  })
+
+  it('never counts a day on a guest', () => {
+    expect(isComplete({ u: { at: 1 }, g: { at: 2 } })).toBe(false)
+  })
+})

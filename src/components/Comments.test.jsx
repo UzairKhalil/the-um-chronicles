@@ -15,8 +15,8 @@ vi.mock('../lib/device.js', () => ({
 
 const Comments = (await import('./Comments.jsx')).default
 
-const uzair = { id: 'u', name: 'Uzair', admin: true }
-const maryam = { id: 'm', name: 'Maryam', admin: false }
+const uzair = { id: 'u', partner: true, name: 'Uzair', admin: true }
+const maryam = { id: 'm', partner: true, name: 'Maryam', admin: false }
 
 const open = async (user) => {
   await user.click(screen.getByRole('button', { name: /comments/i }))
@@ -166,5 +166,38 @@ describe('reactions', () => {
     })
     render(<Comments itemId="poem:x" seat={uzair} />)
     expect(screen.getByRole('button', { name: /heart/i })).toHaveTextContent('2')
+  })
+})
+
+describe('a guest', () => {
+  const guest = { id: 'g', partner: false, name: 'Guest', admin: false }
+
+  it('sees the reactions but cannot add one', async () => {
+    fake.__seed({ reactions: { 'poem:x': { u: { symbol: 'heart', name: 'Uzair', at: 1 } } } })
+    const user = userEvent.setup()
+    render(<Comments itemId="poem:x" seat={guest} />)
+    const heart = screen.getByRole('button', { name: /heart/i })
+    expect(heart).toBeDisabled()
+    expect(heart).toHaveTextContent('1')
+    await user.click(heart)
+    expect(fake.transact).not.toHaveBeenCalled()
+  })
+
+  it('can comment, with the name pre-filled as Guest', async () => {
+    const user = userEvent.setup()
+    render(<Comments itemId="poem:x" seat={guest} />)
+    await open(user)
+    expect(screen.getByLabelText('Name')).toHaveValue('Guest')
+    await user.type(screen.getByLabelText('Comment'), 'Beautiful.')
+    await user.click(screen.getByRole('button', { name: /leave it/i }))
+    await waitFor(() => expect(screen.getByText('Beautiful.')).toBeInTheDocument())
+  })
+
+  it('cannot delete comments', async () => {
+    fake.__seed({ comments: { 'poem:x': { a: { name: 'Uzair', text: 'hello', at: 1 } } } })
+    const user = userEvent.setup()
+    render(<Comments itemId="poem:x" seat={guest} />)
+    await open(user)
+    expect(screen.queryByRole('button', { name: /delete the comment/i })).not.toBeInTheDocument()
   })
 })

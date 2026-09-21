@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import meta from '../content/meta.js'
-import people from '../content/people.js'
+import { partners } from '../content/people.js'
 import { chronicle as chronicleQuotes } from '../content/quotes.js'
 import { pick } from '../lib/pick.js'
 import { useDbValue } from '../hooks/useDb.js'
@@ -168,7 +168,7 @@ export default function Chronicle({ onGo }) {
                 <p className="entry__n tiny faint">
                   Entry {stats.total - i}
                 </p>
-                {people.map((p) => {
+                {partners.map((p) => {
                   const note = entry.signatures?.[p.id]?.note
                   if (!note) return null
                   return (
