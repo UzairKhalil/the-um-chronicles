@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import Reactions from './Reactions.jsx'
-import { addComment, deleteComment, validateComment } from '../lib/records.js'
+import {
+  addComment,
+  deleteComment,
+  validateComment,
+  guestHasCommented,
+} from '../lib/records.js'
 import { useDbValue, toListDesc } from '../hooks/useDb.js'
 import { timeAgo, formatStamp } from '../lib/day.js'
 
@@ -19,6 +24,10 @@ export default function Comments({ itemId, seat, title = 'Comments' }) {
   }, [seat])
 
   const list = toListDesc(raw) // newest first
+
+  // A guest may comment once per item from each device. If the admin deletes
+  // that comment, the key is empty again and the form comes back.
+  const guestDone = !seat.partner && guestHasCommented(raw)
 
   // seat is a dependency: see the note in Reactions.jsx.
   const submit = useCallback(
@@ -70,6 +79,11 @@ export default function Comments({ itemId, seat, title = 'Comments' }) {
 
       {open ? (
         <div className="comments__panel">
+          {guestDone ? (
+            <p className="comments__done small faint">
+              You have left your comment here. Thank you.
+            </p>
+          ) : (
           <form className="comment-form" onSubmit={submit} noValidate>
             <label className="field">
               <span className="field__label">Name</span>
@@ -107,6 +121,7 @@ export default function Comments({ itemId, seat, title = 'Comments' }) {
               {sending ? 'Sending…' : 'Leave it'}
             </button>
           </form>
+          )}
 
           {list.length === 0 ? (
             <p className="comments__empty small faint">Nothing said here yet.</p>

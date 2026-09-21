@@ -1,12 +1,19 @@
 import { useCallback, useState } from 'react'
 import Glyph, { REACTIONS } from './Glyph.jsx'
-import { toggleReaction } from '../lib/records.js'
+import { toggleReaction, reactionKey } from '../lib/records.js'
 import { useDbValue } from '../hooks/useDb.js'
 
+/** 'Guest, Guest, Uzair' -> 'Guest ×2, Uzair' */
+function namesLabel(names) {
+  const counts = new Map()
+  for (const n of names) counts.set(n, (counts.get(n) || 0) + 1)
+  return [...counts].map(([n, c]) => (c > 1 ? `${n} ×${c}` : n)).join(', ')
+}
+
 /**
- * One reaction per person per item, toggling on and off — not a counter that
- * can be spammed. The write is a transaction, because what we store depends
- * on what is already there.
+ * One reaction per person per item — per device, for a guest — toggling on
+ * and off, not a counter that can be spammed. The write is a transaction,
+ * because what we store depends on what is already there.
  */
 export default function Reactions({ itemId, seat }) {
   const [state] = useDbValue(`reactions/${itemId}`)
@@ -29,7 +36,7 @@ export default function Reactions({ itemId, seat }) {
     [itemId, seat, busy]
   )
 
-  const mine = state?.[seat.id]?.symbol || ''
+  const mine = state?.[reactionKey(seat)]?.symbol || ''
   const counts = {}
   const whoBy = {}
   for (const [pid, r] of Object.entries(state || {})) {
@@ -50,7 +57,7 @@ export default function Reactions({ itemId, seat }) {
             className={`reaction${on ? ' is-on' : ''}${busy === key ? ' is-busy' : ''}`}
             onClick={() => toggle(key)}
             aria-pressed={on}
-            title={n ? `${label} — ${whoBy[key].join(', ')}` : label}
+            title={n ? `${label} — ${namesLabel(whoBy[key])}` : label}
           >
             <Glyph name={key} size={17} />
             <span className="reaction__n">{n || ''}</span>

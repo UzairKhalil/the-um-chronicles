@@ -20,7 +20,7 @@ export const gate = [
 
 // Shown under the Sign, on the main screen.
 export const sign = [
-  'I did not fall for you, Maryam. I walked, slowly, with my eyes open.',
+  'Others fall in love by accident. I chose you, Maryam — slowly, with my eyes open.',
   'Some days I have nothing to give you but the fact that I stayed. Take it — it cost me everything and it was easy.',
   'You are the only argument I have ever lost gladly.',
   'I keep finding you in small things: the second cup, the left side of the bed, the pause before I say anything true.',

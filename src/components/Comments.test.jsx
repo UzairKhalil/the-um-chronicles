@@ -180,7 +180,34 @@ describe('a guest', () => {
     expect(heart).toBeEnabled()
     await user.click(heart)
     await waitFor(() => expect(heart).toHaveTextContent('2'))
-    expect(fake.__tree().reactions['poem:x'].g.symbol).toBe('heart')
+    expect(fake.__tree().reactions['poem:x']['g_dev-1'].symbol).toBe('heart')
+  })
+
+  it("does not show another guest device's reaction as this guest's own", () => {
+    fake.__seed({ reactions: { 'poem:x': { 'g_other': { symbol: 'heart', name: 'Guest', at: 1 } } } })
+    render(<Comments itemId="poem:x" seat={guest} />)
+    const heart = screen.getByRole('button', { name: /heart/i })
+    expect(heart).toHaveTextContent('1')
+    expect(heart).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('swaps the form for a thank-you once this device has commented', async () => {
+    const user = userEvent.setup()
+    render(<Comments itemId="poem:x" seat={guest} />)
+    await open(user)
+    await user.type(screen.getByLabelText('Comment'), 'Beautiful.')
+    await user.click(screen.getByRole('button', { name: /leave it/i }))
+    await waitFor(() => expect(screen.getByText(/you have left your comment here/i)).toBeInTheDocument())
+    expect(screen.queryByLabelText('Comment')).not.toBeInTheDocument()
+    expect(screen.getByText('Beautiful.')).toBeInTheDocument()
+  })
+
+  it("still offers the form when only another guest device has commented", async () => {
+    fake.__seed({ comments: { 'poem:x': { g_other: { name: 'Sara', personId: 'g', text: 'Hi', at: 1 } } } })
+    const user = userEvent.setup()
+    render(<Comments itemId="poem:x" seat={guest} />)
+    await open(user)
+    expect(screen.getByLabelText('Comment')).toBeInTheDocument()
   })
 
   it('can comment, with the name pre-filled as Guest', async () => {

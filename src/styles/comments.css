@@ -149,3 +149,5 @@
   .comment { animation: none; }
   .reaction.is-on .glyph { animation: none; }
 }
+
+.comments__done { text-align: center; font-style: italic; margin: 0.4rem 0 0; }

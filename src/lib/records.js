@@ -6,7 +6,9 @@
 //   signIns/{pushId}                { personId, name, at, device }
 //   days/{YYYY-MM-DD}/{personId}    { at, note }
 //   comments/{itemId}/{pushId}      { personId, name, text, at, device }
+//   comments/{itemId}/g_{deviceId}  the same, for a guest: one per device
 //   reactions/{itemId}/{personId}   { symbol, at, device }
+//   reactions/{itemId}/g_{deviceId} the same, for a guest: one per device
 //   devices/{deviceId}              { firstAt, lastAt, lastPersonId, ...detail }
 //
 // itemId is 'poem:<poem id>' or 'quote:<quote key>'. Realtime Database keys
@@ -14,7 +16,8 @@
 // ---------------------------------------------------------------------------
 
 import { push, set, remove, transact, serverNow, update, get } from './db.js'
-import { describeDevice } from './device.js'
+import { describeDevice, deviceId } from './device.js'
+import { byId } from '../content/people.js'
 import { today } from './day.js'
 
 // Sign-ins accumulate forever otherwise. The client trims the oldest after
@@ -35,6 +38,18 @@ export function deviceSnapshot() {
 function requirePartner(person, action) {
   if (!person?.partner) throw new Error(`Only the two partners can ${action}.`)
 }
+
+// Everyone using the guest code shares one person id, 'g'. To give each guest
+// their own reaction and comment, a guest is keyed by the device instead:
+// 'g_<device id>'. The device id is the random value device.js keeps in that
+// browser's storage — clearing site data mints a new one, and with it a new
+// guest. That is the honest limit of "one per guest" without accounts.
+export const guestKey = () => `g_${deviceId()}`
+
+/** The key a person's reaction lives under: their id, or a guest's device. */
+export const reactionKey = (person) => (person?.partner ? person.id : guestKey())
+
+const isGuestId = (personId) => byId(personId)?.partner === false
 
 export const poemItemId = (id) => `poem:${id}`
 export const quoteItemId = (key) => `quote:${key}`
@@ -113,15 +128,40 @@ export async function addComment(itemId, { name, text, personId }) {
 
   const device = await deviceSnapshot()
   const at = serverNow()
-  const key = await push(`comments/${itemId}`, {
+  const comment = {
     personId: personId || '',
     name: String(name).trim().slice(0, 60),
     text: String(text).trim().slice(0, 2000),
     at,
     device,
-  })
+  }
+
+  // The partners may comment as often as they like. A guest gets one comment
+  // per item per device, stored under a key derived from the device, and
+  // written only if that key is still empty — a transaction, so two taps
+  // cannot both land. The database rules enforce the same.
+  if (isGuestId(personId)) {
+    const key = guestKey()
+    const res = await transact(`comments/${itemId}/${key}`, (current) =>
+      current ? undefined : comment
+    )
+    if (!res.committed) {
+      throw Object.assign(new Error('already commented'), {
+        errors: { text: 'You have already left your comment here.' },
+      })
+    }
+    await touchDevice(device, personId)
+    return key
+  }
+
+  const key = await push(`comments/${itemId}`, comment)
   await touchDevice(device, personId)
   return key
+}
+
+/** Has this device's guest already commented on the item? */
+export function guestHasCommented(comments) {
+  return Boolean(comments && comments[guestKey()])
 }
 
 export async function deleteComment(itemId, key) {
@@ -129,14 +169,14 @@ export async function deleteComment(itemId, key) {
 }
 
 /**
- * One reaction per person per item. Tapping the same symbol again clears it;
- * tapping a different one replaces it. A transaction, because the value we
- * write depends on the value already there.
+ * One reaction per person per item — and per device, for a guest. Tapping the
+ * same symbol again clears it; tapping a different one replaces it. A
+ * transaction, because the value we write depends on the value already there.
  */
 export async function toggleReaction(itemId, person, symbol) {
   const device = await deviceSnapshot()
   const at = serverNow()
-  const res = await transact(`reactions/${itemId}/${person.id}`, (current) => {
+  const res = await transact(`reactions/${itemId}/${reactionKey(person)}`, (current) => {
     if (current && current.symbol === symbol) return null // clear it
     return { symbol, at, name: person.name, device }
   })

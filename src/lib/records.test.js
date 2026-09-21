@@ -6,12 +6,15 @@ const fake = makeFakeDb()
 vi.mock('./db.js', () => fake)
 vi.mock('./device.js', () => ({
   describeDevice: async () => ({ id: 'dev-1', model: 'Pixel 8', os: 'Android' }),
-  deviceId: () => 'dev-1',
+  deviceId: vi.fn(() => 'dev-1'),
   deviceLabel: () => 'Pixel 8',
   deviceFirstSeen: () => null,
 }))
 
 const records = await import('./records.js')
+const device = await import('./device.js')
+/** Pretend the next writes come from a different phone. */
+const onDevice = (id) => device.deviceId.mockImplementation(() => id)
 const { today } = await import('./day.js')
 
 const uzair = { id: 'u', partner: true, name: 'Uzair', admin: true }
@@ -20,6 +23,7 @@ const maryam = { id: 'm', partner: true, name: 'Maryam', admin: false }
 beforeEach(() => {
   fake.__seed({})
   vi.clearAllMocks()
+  onDevice('dev-1')
 })
 
 describe('signing', () => {
@@ -172,20 +176,81 @@ describe('a guest', () => {
     expect(fake.__tree().days).toBeUndefined()
   })
 
-  it('can react, alongside the two partners, one reaction for the guest seat', async () => {
+  it('reacts under its own device, alongside the partners', async () => {
     await records.toggleReaction('poem:x', guest, 'heart')
     await records.toggleReaction('poem:x', uzair, 'rose')
-    expect(fake.__tree().reactions['poem:x'].g.symbol).toBe('heart')
+    expect(fake.__tree().reactions['poem:x']['g_dev-1'].symbol).toBe('heart')
     expect(fake.__tree().reactions['poem:x'].u.symbol).toBe('rose')
-    await records.toggleReaction('poem:x', guest, 'heart')
     expect(fake.__tree().reactions['poem:x'].g).toBeUndefined()
   })
 
-  it('can leave a comment', async () => {
+  it('gives every guest device its own reaction', async () => {
+    await records.toggleReaction('poem:x', guest, 'heart')
+    onDevice('dev-2')
+    await records.toggleReaction('poem:x', guest, 'spark')
+    const r = fake.__tree().reactions['poem:x']
+    expect(r['g_dev-1'].symbol).toBe('heart')
+    expect(r['g_dev-2'].symbol).toBe('spark')
+  })
+
+  it('keeps one reaction per guest device, toggling and replacing', async () => {
+    await records.toggleReaction('poem:x', guest, 'heart')
+    await records.toggleReaction('poem:x', guest, 'rose')
+    expect(Object.keys(fake.__tree().reactions['poem:x'])).toEqual(['g_dev-1'])
+    expect(fake.__tree().reactions['poem:x']['g_dev-1'].symbol).toBe('rose')
+    await records.toggleReaction('poem:x', guest, 'rose')
+    expect(fake.__tree().reactions['poem:x']?.['g_dev-1']).toBeUndefined()
+  })
+
+  it('can leave one comment per item, under its own device', async () => {
     await records.addComment('poem:x', { name: 'Guest', text: 'Beautiful.', personId: 'g' })
-    const stored = Object.values(fake.__tree().comments['poem:x'])[0]
+    const stored = fake.__tree().comments['poem:x']['g_dev-1']
     expect(stored.personId).toBe('g')
     expect(stored.text).toBe('Beautiful.')
+  })
+
+  it('cannot leave a second comment on the same item from the same device', async () => {
+    await records.addComment('poem:x', { name: 'Guest', text: 'First.', personId: 'g' })
+    await expect(
+      records.addComment('poem:x', { name: 'Guest', text: 'Second.', personId: 'g' })
+    ).rejects.toMatchObject({ errors: { text: expect.stringMatching(/already/) } })
+    expect(Object.keys(fake.__tree().comments['poem:x'])).toEqual(['g_dev-1'])
+    expect(fake.__tree().comments['poem:x']['g_dev-1'].text).toBe('First.')
+  })
+
+  it('can comment on a different item', async () => {
+    await records.addComment('poem:x', { name: 'Guest', text: 'One.', personId: 'g' })
+    await records.addComment('poem:y', { name: 'Guest', text: 'Two.', personId: 'g' })
+    expect(fake.__tree().comments['poem:y']['g_dev-1'].text).toBe('Two.')
+  })
+
+  it('lets a second guest device comment on the same item', async () => {
+    await records.addComment('poem:x', { name: 'Ali', text: 'One.', personId: 'g' })
+    onDevice('dev-2')
+    await records.addComment('poem:x', { name: 'Sara', text: 'Two.', personId: 'g' })
+    expect(Object.keys(fake.__tree().comments['poem:x']).sort()).toEqual(['g_dev-1', 'g_dev-2'])
+  })
+
+  it('may comment again once the admin has deleted the first', async () => {
+    const key = await records.addComment('poem:x', { name: 'Guest', text: 'One.', personId: 'g' })
+    await records.deleteComment('poem:x', key)
+    await records.addComment('poem:x', { name: 'Guest', text: 'Again.', personId: 'g' })
+    expect(fake.__tree().comments['poem:x']['g_dev-1'].text).toBe('Again.')
+  })
+
+  it('knows whether this device has commented', async () => {
+    expect(records.guestHasCommented({})).toBe(false)
+    await records.addComment('poem:x', { name: 'Guest', text: 'One.', personId: 'g' })
+    expect(records.guestHasCommented(fake.__tree().comments['poem:x'])).toBe(true)
+    onDevice('dev-2')
+    expect(records.guestHasCommented(fake.__tree().comments['poem:x'])).toBe(false)
+  })
+
+  it('leaves the partners free to comment as often as they like', async () => {
+    await records.addComment('poem:x', { name: 'Uzair', text: 'One.', personId: 'u' })
+    await records.addComment('poem:x', { name: 'Uzair', text: 'Two.', personId: 'u' })
+    await records.addComment('poem:x', { name: 'Uzair', text: 'Three.', personId: 'u' })
+    expect(Object.keys(fake.__tree().comments['poem:x'])).toHaveLength(3)
   })
 
   it('has its sign-in recorded like anyone else', async () => {

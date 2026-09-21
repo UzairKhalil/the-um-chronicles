@@ -54,7 +54,7 @@
       "comments": {
         "$item": {
           "$id": {
-            ".validate": "newData.hasChildren(['name', 'text', 'at']) && newData.child('name').val().length > 0 && newData.child('text').val().length > 0",
+            ".validate": "newData.hasChildren(['name', 'text', 'at']) && newData.child('name').val().length > 0 && newData.child('text').val().length > 0 && (newData.child('personId').val() != 'g' || ($id.matches(/^g_[0-9a-z-]{6,40}$/) && !data.exists()))",
             "name":     { ".validate": "newData.isString() && newData.val().length <= 60" },
             "text":     { ".validate": "newData.isString() && newData.val().length <= 2000" },
             "at":       { ".validate": "newData.isNumber()" },
@@ -70,7 +70,7 @@
       "reactions": {
         "$item": {
           "$person": {
-            ".validate": "$person == 'u' || $person == 'm' || $person == 'g'",
+            ".validate": "$person == 'u' || $person == 'm' || $person.matches(/^g_[0-9a-z-]{6,40}$/)",
             "symbol": { ".validate": "newData.val() == 'heart' || newData.val() == 'rose' || newData.val() == 'spark'" },
             "at":     { ".validate": "newData.isNumber()" },
             "name":   { ".validate": "newData.isString() && newData.val().length <= 60" },

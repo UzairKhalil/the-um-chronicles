@@ -75,8 +75,17 @@ belongs to (`u`, `m`); `g` is a guest.
   before it is made. The Firebase rules accept only `'u'` or `'m'` under
   `days`, so a guest signature would be rejected — and a rejected write sits
   queued in the SDK (rule 9), which is why it is stopped client-side first.
-* The `reactions` rule accepts `'u'`, `'m'` and `'g'`. Every guest shares the
-  one id `g`, so all guests together hold one reaction per item.
+* **Each guest device is its own guest.** Everyone using the guest code shares
+  the person id `g`, so guest reactions and comments are keyed by device
+  instead: `g_<device id>` (`guestKey()` in `records.js`). Each guest device
+  gets one reaction and one comment per item; the partners keep one reaction
+  and unlimited comments. The rules enforce it: `reactions` accepts `u`, `m`
+  or a `g_…` key, and a comment with `personId: 'g'` must sit under a `g_…`
+  key that does not exist yet. When the admin deletes a guest's comment the
+  key is free again and that guest may comment once more.
+* The honest limit: the device id is a random value in that browser's
+  storage. Clearing site data, or a private window, makes a new guest. There
+  is no stronger identity without accounts.
 * Rule changes that widen who may write must be **published before** the
   code that uses them is deployed — otherwise the new writes are rejected and
   queue up. The rules are shared with another app: merge, never replace.
