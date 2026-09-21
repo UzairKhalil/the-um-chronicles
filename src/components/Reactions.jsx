@@ -29,9 +29,6 @@ export default function Reactions({ itemId, seat }) {
     [itemId, seat, busy]
   )
 
-  // A guest sees the reactions but cannot add one: the database rules only
-  // accept reactions from the two partners.
-  const canReact = Boolean(seat.partner)
   const mine = state?.[seat.id]?.symbol || ''
   const counts = {}
   const whoBy = {}
@@ -51,8 +48,7 @@ export default function Reactions({ itemId, seat }) {
             key={key}
             type="button"
             className={`reaction${on ? ' is-on' : ''}${busy === key ? ' is-busy' : ''}`}
-            onClick={canReact ? () => toggle(key) : undefined}
-            disabled={!canReact}
+            onClick={() => toggle(key)}
             aria-pressed={on}
             title={n ? `${label} — ${whoBy[key].join(', ')}` : label}
           >

@@ -12,8 +12,9 @@
 //                 partners sign it, and the Sign draws one half for each.
 //                 The ids 'u' and 'm' are also written into the Firebase
 //                 rules — changing them means republishing the rules.
-// partner: false  a guest. Can read everything and leave comments, but cannot
-//                 sign the Sign or react (the rules only accept 'u' and 'm').
+// partner: false  a guest. Can read everything, comment and react, and can
+//                 see the Sign — but cannot sign it (the rules accept only
+//                 'u' and 'm' under days).
 // ---------------------------------------------------------------------------
 
 export const people = [

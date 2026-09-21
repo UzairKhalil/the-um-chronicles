@@ -172,15 +172,15 @@ describe('reactions', () => {
 describe('a guest', () => {
   const guest = { id: 'g', partner: false, name: 'Guest', admin: false }
 
-  it('sees the reactions but cannot add one', async () => {
+  it('can react, and it counts alongside the partners', async () => {
     fake.__seed({ reactions: { 'poem:x': { u: { symbol: 'heart', name: 'Uzair', at: 1 } } } })
     const user = userEvent.setup()
     render(<Comments itemId="poem:x" seat={guest} />)
     const heart = screen.getByRole('button', { name: /heart/i })
-    expect(heart).toBeDisabled()
-    expect(heart).toHaveTextContent('1')
+    expect(heart).toBeEnabled()
     await user.click(heart)
-    expect(fake.transact).not.toHaveBeenCalled()
+    await waitFor(() => expect(heart).toHaveTextContent('2'))
+    expect(fake.__tree().reactions['poem:x'].g.symbol).toBe('heart')
   })
 
   it('can comment, with the name pre-filled as Guest', async () => {

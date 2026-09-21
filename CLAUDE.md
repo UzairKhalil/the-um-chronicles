@@ -70,15 +70,16 @@ belongs to (`u`, `m`); `g` is a guest.
   and the Sign's two halves read `partners`, never the whole `people` list —
   counting every seat would require the guest to sign too, and no day would
   ever count again.
-* A guest can read everything and leave comments. A guest cannot sign or
-  react: the buttons are hidden or disabled, and `records.js` refuses the
-  write before it is made. The Firebase rules only accept `'u'` or `'m'`
-  under `days` and `reactions`, so a guest write would be rejected — and a
-  rejected write sits queued in the SDK (rule 9), which is why it is stopped
-  client-side first.
-* Giving the guest reactions means adding `'g'` to the `reactions` rule and
-  republishing — the rules are shared with another app, so merge, never
-  replace.
+* A guest can read everything, comment and react. A guest **cannot sign**:
+  the Sign is shown but not clickable, and `records.js` refuses the write
+  before it is made. The Firebase rules accept only `'u'` or `'m'` under
+  `days`, so a guest signature would be rejected — and a rejected write sits
+  queued in the SDK (rule 9), which is why it is stopped client-side first.
+* The `reactions` rule accepts `'u'`, `'m'` and `'g'`. Every guest shares the
+  one id `g`, so all guests together hold one reaction per item.
+* Rule changes that widen who may write must be **published before** the
+  code that uses them is deployed — otherwise the new writes are rejected and
+  queue up. The rules are shared with another app: merge, never replace.
 
 ### Urdu
 

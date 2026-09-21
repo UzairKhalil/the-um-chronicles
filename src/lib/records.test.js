@@ -172,9 +172,13 @@ describe('a guest', () => {
     expect(fake.__tree().days).toBeUndefined()
   })
 
-  it('cannot react, and nothing is written', async () => {
-    await expect(records.toggleReaction('poem:x', guest, 'heart')).rejects.toThrow(/partners/)
-    expect(fake.__tree().reactions).toBeUndefined()
+  it('can react, alongside the two partners, one reaction for the guest seat', async () => {
+    await records.toggleReaction('poem:x', guest, 'heart')
+    await records.toggleReaction('poem:x', uzair, 'rose')
+    expect(fake.__tree().reactions['poem:x'].g.symbol).toBe('heart')
+    expect(fake.__tree().reactions['poem:x'].u.symbol).toBe('rose')
+    await records.toggleReaction('poem:x', guest, 'heart')
+    expect(fake.__tree().reactions['poem:x'].g).toBeUndefined()
   })
 
   it('can leave a comment', async () => {

@@ -70,7 +70,7 @@
       "reactions": {
         "$item": {
           "$person": {
-            ".validate": "$person == 'u' || $person == 'm'",
+            ".validate": "$person == 'u' || $person == 'm' || $person == 'g'",
             "symbol": { ".validate": "newData.val() == 'heart' || newData.val() == 'rose' || newData.val() == 'spark'" },
             "at":     { ".validate": "newData.isNumber()" },
             "name":   { ".validate": "newData.isString() && newData.val().length <= 60" },

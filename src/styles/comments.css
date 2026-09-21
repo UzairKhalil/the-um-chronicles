@@ -74,9 +74,6 @@
 
 .reaction:active:not(:disabled) { transform: scale(0.94); }
 
-/* a guest sees the counts but cannot react */
-.reaction:disabled { cursor: default; opacity: 0.75; }
-
 .reaction.is-busy { opacity: 0.5; }
 
 .reaction__n { font-variant-numeric: tabular-nums; min-width: 0; }
