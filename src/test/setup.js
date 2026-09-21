@@ -56,4 +56,5 @@ if (!globalThis.matchMedia) {
 afterEach(() => {
   cleanup()
   localStorage.clear()
+  sessionStorage.clear()
 })

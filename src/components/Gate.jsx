@@ -112,7 +112,6 @@ export default function Gate({ onEnter, status }) {
               still works; it just will not travel to the other phone.
             </p>
           ) : null}
-          <p className="tiny faint gate__privacy">{meta.privacyNote}</p>
         </footer>
       </div>
     </div>

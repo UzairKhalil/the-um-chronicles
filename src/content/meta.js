@@ -24,10 +24,6 @@ export const meta = {
   // viewer's. Any IANA zone works: 'Asia/Karachi', 'Europe/London', 'UTC'.
   dayTimeZone: 'Asia/Karachi',
 
-  // Small print on the gate. Required by nobody but us — say it anyway.
-  privacyNote:
-    'Visits, signatures and comments are recorded here, along with basic details about the device you are using. Only the two of us can see them.',
-
   // Heading of the record the Sign builds.
   chronicleTitle: 'The Chronicle',
   chronicleBlurb: 'Every day we both signed.',

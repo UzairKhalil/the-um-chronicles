@@ -10,6 +10,7 @@ import { loadSeat, saveSeat, clearSeat } from './lib/session.js'
 import { recordSignIn } from './lib/records.js'
 import { useDbStatus } from './hooks/useDb.js'
 import useHashRoute from './hooks/useHashRoute.js'
+import useSessionExpiry from './hooks/useSessionExpiry.js'
 import { watchForNewBuild } from './lib/version.js'
 
 export default function App() {
@@ -46,6 +47,11 @@ export default function App() {
     setSeat(null)
     go('')
   }, [go])
+
+  // Back to the code screen after five idle minutes, or as soon as the page
+  // is hidden (minimised, locked, switched away). Tab and browser close are
+  // covered by the seat living in sessionStorage — see lib/session.js.
+  useSessionExpiry({ active: Boolean(seat), onExpire: leave })
 
   if (!seat) return <Gate onEnter={enter} status={status} />
 

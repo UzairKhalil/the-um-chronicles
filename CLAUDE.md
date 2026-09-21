@@ -95,11 +95,29 @@ every table is `position: sticky; left: 0`.
   mints a new one.
 
 Codes are never written to the database, never logged, never persisted. Only a
-person `id` goes into `localStorage`.
+person `id` goes into `sessionStorage`.
 
-### There is no idle sign-out
+### Sessions expire
 
-Deliberate. The seat is remembered until someone signs out by hand.
+The owner asked for this; an earlier build remembered the seat indefinitely.
+The code screen comes back when:
+
+* **the tab or browser closes** — the seat lives in `sessionStorage`, which
+  the browser discards with the tab (`lib/session.js`);
+* **the page is hidden** — minimised, phone locked, switched to another app
+  or tab (`hooks/useSessionExpiry.js`);
+* **five minutes pass with no touch, key or scroll** — also that hook. Each
+  activity also checks the wall-clock gap, because timers freeze while a
+  device sleeps.
+
+The trap: **a reload also makes the page hidden**, and so would sign people out
+on every refresh and every `version.js` auto-reload into a new deploy. A
+reload is told apart by `beforeunload`, which fires on reload and close but
+never on minimise. The page records when it left, and `loadSeat()` keeps the
+seat only if it came back within 10 seconds — which also drops the seat when
+a browser restores closed tabs along with their `sessionStorage`. The
+back/forward cache is handled on `pageshow`. Do not "simplify" this into
+`pagehide` or a bare `visibilitychange`; both fire on reload.
 
 ## Engineering rules — do not rediscover these
 
@@ -167,8 +185,8 @@ The repository and the published site are public.
   description, the README and this file.
 * `index.html` carries `robots: noindex, nofollow`, and `public/robots.txt`
   disallows everything.
-* The gate states plainly that visits and comments are recorded with basic
-  device details.
+* The gate no longer carries a notice that visits and comments are recorded;
+  the owner removed it. The recording itself is unchanged.
 
 ## Commands
 

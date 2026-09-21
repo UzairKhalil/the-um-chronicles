@@ -27,10 +27,10 @@ describe('the gate', () => {
     expect(container.textContent).not.toMatch(/Maryam/i)
   })
 
-  it('says visits and comments are recorded', () => {
-    render(<Gate onEnter={() => {}} status="online" />)
-    expect(screen.getByText(/recorded here/i)).toBeInTheDocument()
-    expect(screen.getByText(/device you are using/i)).toBeInTheDocument()
+  it('carries no recording notice (removed at the owner’s request)', () => {
+    const { container } = render(<Gate onEnter={() => {}} status="online" />)
+    expect(container.textContent).not.toMatch(/recorded/i)
+    expect(container.textContent).not.toMatch(/device you are using/i)
   })
 
   it('opens for the first code', async () => {
