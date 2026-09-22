@@ -87,70 +87,35 @@
   margin-top: 2.6rem;
 }
 
-/* ---------------------------------------------------------- music control */
+/* ------------------------------------------------------------- music icon */
 /* Bottom-right corner, clear of the phone's home bar, on every screen once
-   someone is signed in:  [ − ] [ ♪ ] [ + ]  with the level marked below.
-   The note mutes and unmutes; − and + step the volume. */
+   someone is signed in. Mutes or unmutes the background music, which starts
+   muted. One button only — no volume controls, by the owner's choice. */
 
-.music-control {
+.music-toggle {
   position: fixed;
-  right: calc(env(safe-area-inset-right, 0px) + 12px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 14px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   z-index: 40;
   display: grid;
-  gap: 5px;
-  padding: 4px 4px 6px;
-  border-radius: 999px;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  padding: 0;
+  border-radius: 50%;
   border: 1px solid var(--line-strong);
-  background: rgba(20, 10, 17, 0.8);
+  background: rgba(20, 10, 17, 0.78);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-}
-
-.music-control__row {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.music-toggle,
-.music-control__step {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
   color: var(--ink-faint);
   cursor: pointer;
-  transition: color 0.3s var(--ease), background-color 0.3s var(--ease);
+  transition: color 0.35s var(--ease), border-color 0.35s var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 
-.music-toggle {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-}
+.music-toggle:hover { color: var(--ink); }
 
-.music-control__step {
-  width: 2.3rem;
-  height: 2.3rem;
-  border-radius: 50%;
-  font-family: var(--serif);
-  font-size: 1.3rem;
-  line-height: 1;
-}
-
-.music-toggle:hover,
-.music-control__step:hover:not(:disabled) {
-  color: var(--ink);
-  background: rgba(243, 227, 214, 0.06);
-}
-
-.music-control__step:disabled { opacity: 0.3; cursor: default; }
-
-.music-control.is-on .music-toggle {
+.music-toggle.is-on {
   color: var(--accent);
   border-color: var(--accent);
   animation: musicGlow 4s ease-in-out infinite;
@@ -158,29 +123,11 @@
 
 @keyframes musicGlow {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); }
-  50%      { box-shadow: 0 0 0 5px var(--accent-soft); }
+  50%      { box-shadow: 0 0 0 6px var(--accent-soft); }
 }
-
-/* the level, as a row of small marks */
-.music-control__level {
-  display: flex;
-  justify-content: center;
-  gap: 3px;
-}
-
-.music-control__tick {
-  width: 5px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--line-strong);
-  transition: background-color 0.3s var(--ease);
-}
-
-.music-control.is-on .music-control__tick.is-lit { background: var(--accent); }
-.music-control:not(.is-on) .music-control__tick.is-lit { background: var(--ink-faint); }
 
 @media (prefers-reduced-motion: reduce) {
-  .music-control.is-on .music-toggle { animation: none; }
+  .music-toggle.is-on { animation: none; }
 }
 
 /* ------------------------------------------------------------------ tally */

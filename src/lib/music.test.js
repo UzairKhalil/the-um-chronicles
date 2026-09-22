@@ -7,12 +7,7 @@ import {
   loadMusicPref,
   saveMusicPref,
   musicSupported,
-  LEVELS,
-  DEFAULT_LEVEL,
-  levelToGain,
-  clampLevel,
-  loadMusicLevel,
-  saveMusicLevel,
+  VOLUME,
 } from './music.js'
 import meta from '../content/meta.js'
 
@@ -112,51 +107,36 @@ describe('the player', () => {
     return { ctx, master: () => gains[0] } // the first gain node built
   }
 
-  it('fades in to the chosen level, never above it, and out to silence', () => {
+  it('fades in to the fixed volume, never above it, and out to silence', () => {
     const { ctx, master } = withMaster()
-    const player = createMusic({ context: ctx, level: DEFAULT_LEVEL })
+    const player = createMusic({ context: ctx })
     player.start()
-    expect(master().gain.value).toBeCloseTo(levelToGain(DEFAULT_LEVEL))
-    expect(Math.max(...master().gain.history)).toBeLessThanOrEqual(levelToGain(DEFAULT_LEVEL) + 1e-9)
+    expect(master().gain.value).toBeCloseTo(VOLUME)
+    expect(Math.max(...master().gain.history)).toBeLessThanOrEqual(VOLUME + 1e-9)
     player.stop()
     expect(master().gain.value).toBe(0)
   })
 
-  it('glides to a new level while playing', () => {
-    const { ctx, master } = withMaster()
-    const player = createMusic({ context: ctx, level: 5 })
-    player.start()
-    player.setLevel(8)
-    expect(master().gain.value).toBeCloseTo(levelToGain(8))
-    player.setLevel(2)
-    expect(master().gain.value).toBeCloseTo(levelToGain(2))
-    player.stop()
-  })
-
-  it('keeps a level chosen while muted for the next start', () => {
-    const { ctx, master } = withMaster()
-    const player = createMusic({ context: ctx, level: 5 })
-    player.setLevel(7)
-    player.start()
-    expect(master().gain.value).toBeCloseTo(levelToGain(7))
-    player.stop()
+  it('uses the measured middle volume', () => {
+    // 1.12 measured about -24 dB in a real browser: soft, still carries.
+    expect(VOLUME).toBeGreaterThanOrEqual(0.9)
+    expect(VOLUME).toBeLessThanOrEqual(1.4)
   })
 
   it('opens each piece with harmony alone; the melody joins the second time round', () => {
     const p = PIECES[0]
     const bar = (60 / p.bpm) * 4
-    const perBar = (i) => 4 + p.arp.filter((x) => x != null).length * 2 + 0 * i
+    const perBar = 4 + p.arp.filter((x) => x != null).length * 2
     const melodyNotesIn = (i) => p.melody.filter(([b]) => Math.floor(b / 4) === i).length * 2
 
     const first = fakeContext()
     createMusic({ context: first.ctx })._renderAhead(bar * 8 - 0.01)
-    const expectedFirst = [...Array(8).keys()].reduce((n, i) => n + perBar(i), 0)
-    expect(first.oscillators).toHaveLength(expectedFirst)
+    expect(first.oscillators).toHaveLength(perBar * 8)
 
     const two = fakeContext()
     createMusic({ context: two.ctx })._renderAhead(bar * 16 - 0.01)
-    const expectedSecondLoop = [...Array(8).keys()].reduce((n, i) => n + perBar(i) + melodyNotesIn(i), 0)
-    expect(two.oscillators).toHaveLength(expectedFirst + expectedSecondLoop)
+    const secondLoop = [...Array(8).keys()].reduce((n, i) => n + perBar + melodyNotesIn(i), 0)
+    expect(two.oscillators).toHaveLength(perBar * 8 + secondLoop)
   })
 
   it('moves on to the next piece after its turns, with a breath between', () => {
@@ -210,41 +190,10 @@ describe('the player', () => {
   })
 })
 
-describe('volume levels', () => {
-  it('has nine, starting in the middle', () => {
-    expect(LEVELS).toBe(9)
-    expect(DEFAULT_LEVEL).toBe(5)
-    expect(loadMusicLevel()).toBe(5)
-  })
-
-  it('gets louder by the same step each time', () => {
-    const db = (l) => 20 * Math.log10(levelToGain(l))
-    for (let l = 2; l <= LEVELS; l += 1) expect(db(l) - db(l - 1)).toBeCloseTo(2.25)
-  })
-
-  it('starts its quietest at the old setting the owner found too low', () => {
-    expect(levelToGain(1)).toBeCloseTo(0.4, 2)
-    expect(levelToGain(DEFAULT_LEVEL)).toBeGreaterThan(levelToGain(1) * 2.5) // ~9 dB up
-    expect(levelToGain(LEVELS)).toBeLessThanOrEqual(3.2)
-  })
-
-  it('never goes past either end', () => {
-    expect(clampLevel(0)).toBe(1)
-    expect(clampLevel(99)).toBe(LEVELS)
-    expect(clampLevel('nonsense')).toBe(DEFAULT_LEVEL)
-  })
-
-  it('remembers the level on this device', () => {
-    saveMusicLevel(7)
-    expect(loadMusicLevel()).toBe(7)
-    saveMusicLevel(42)
-    expect(loadMusicLevel()).toBe(LEVELS)
-  })
-})
-
 describe('each device remembers its choice', () => {
-  it('plays by default', () => {
-    expect(loadMusicPref()).toBe(meta.music.onByDefault)
+  it('starts muted, until someone turns it on', () => {
+    expect(meta.music.onByDefault).toBe(false)
+    expect(loadMusicPref()).toBe(false)
   })
 
   it('stays muted once muted, and back on once unmuted', () => {

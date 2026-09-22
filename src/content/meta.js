@@ -19,16 +19,14 @@ export const meta = {
   poetryLabel: "Uzair's Love for Maryam",
 
   // Background music: original pieces played live in the browser (music.js).
-  // onByDefault   whether it plays on a device that has never chosen
-  // levels        how many steps the − / + buttons have
-  // defaultLevel  where a device starts; the middle, as asked. Each device
-  //               remembers its own level after that.
-  // The loudness of each level is set in music.js (levelToGain) and was
-  // measured, not guessed — see CLAUDE.md.
+  // onByDefault  whether it plays on a device that has never chosen. Off:
+  //              the music starts muted and the note icon turns it on.
+  // volume       a fixed gain. 1.12 measured about -24 dB in a real browser:
+  //              soft background that still carries on a phone. See CLAUDE.md
+  //              for the measurements before changing it.
   music: {
-    onByDefault: true,
-    levels: 9,
-    defaultLevel: 5,
+    onByDefault: false,
+    volume: 1.12,
   },
 
   // The three tabs on the poetry page, kept separate: your poems, your own

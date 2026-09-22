@@ -152,29 +152,24 @@ note icon in the bottom-right corner (`MusicToggle.jsx`) to mute or unmute.
   the rights to**: the site and repository are public. If the owner wants
   specific recordings, they must be licensed for this use, and it is his
   call, made explicitly.
-* **Volume has nine levels**, stepped with − and + beside the note icon,
-  starting in the middle (5). Each device remembers its level
-  (`localStorage: umc.music.level`); pressing + while muted brings the music
-  back. `levelToGain()` in `music.js` sets the loudness: an even 2.25 dB per
-  step. Measured in a real browser by offline rendering:
-
-  | level | RMS    | peak  |
-  |-------|--------|-------|
-  | 1     | −32 dB | 0.13  |
-  | 5     | −24 dB | 0.34  |
-  | 9     | −15 dB | 0.88  |
-
-  Level 1 is the old fixed setting the owner found too quiet; level 9 is
-  near ordinary music; a limiter keeps it from clipping. (A first attempt at
-  a fixed 0.05 measured −52 dB: silent on a phone.) Measure before changing
-  any of this; do not guess.
-* **Browsers only allow sound after a gesture.** Typing the code on the gate
-  primes the audio (`primeAudio()` in `Gate.jsx`). After a reload, the first
-  touch anywhere starts it. The toggle starts and stops sound inside its own
-  click handler, because Safari refuses audio started even a moment later.
+* **It starts muted.** Nothing plays until someone taps the note icon; each
+  device then remembers its own choice (`localStorage: umc.music`). There
+  are **no volume controls** — the owner had − / + buttons removed — only
+  mute and unmute.
+* **Volume is fixed**, `meta.js → music.volume` = 1.12. Measured in a real
+  browser by offline rendering: about −24 dB RMS, peak about 0.34 — soft
+  background that still carries on a phone speaker. For reference, 0.4
+  measured −32 dB (the owner found it too quiet), 3.2 measured −15 dB (about
+  ordinary music), and 0.05 measured −52 dB (silent on a phone). A limiter
+  keeps any setting from clipping. Measure before changing it; do not guess.
+* **Browsers only allow sound after a gesture.** Tapping the note icon is
+  that gesture: the toggle starts and stops sound inside its own click
+  handler, because Safari refuses audio started even a moment later. On a
+  device that has turned music on, typing the code on the gate primes the
+  audio (`primeAudio()` in `Gate.jsx`), and after a reload the first touch
+  anywhere starts it.
 * Music plays only while signed in, so it stops whenever a session ends —
-  including when the phone locks or the app is left. Each device remembers
-  its own mute choice (`localStorage: umc.music`).
+  including when the phone locks or the app is left.
 * Audio times must never be negative: the timing "looseness" is clamped at
   zero. The test stand-in AudioContext is as strict as a browser and throws,
   so a regression fails the tests.
