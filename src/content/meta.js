@@ -18,6 +18,12 @@ export const meta = {
   // The button that opens the poetry page.
   poetryLabel: "Uzair's Love for Maryam",
 
+  // The section below the poems holding other writers' words (classics.js).
+  // It is the only thing on screen saying the words are someone else's — no
+  // author or source is shown on any card, by the owner's choice.
+  classicsTitle: 'Their Words, Our Story',
+  classicsBlurb: 'Lines others wrote long ago, that say it too.',
+
   // A shared ritual needs one shared idea of "today", or two phones in two
   // countries disagree about whether a day counted. Every day boundary in the
   // app is computed in this time zone, on the server's clock — not the

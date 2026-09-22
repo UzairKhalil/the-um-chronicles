@@ -1,8 +1,10 @@
 import { useMemo } from 'react'
 import Poem from './Poem.jsx'
+import ClassicCard from './ClassicCard.jsx'
 import Comments from './Comments.jsx'
 import Interstitial from './Interstitial.jsx'
 import poems from '../content/poems.js'
+import classics from '../content/classics.js'
 import meta from '../content/meta.js'
 import { sign as signQuotes, poetry as poetryQuotes } from '../content/quotes.js'
 import { pick } from '../lib/pick.js'
@@ -29,6 +31,25 @@ export default function Poetry({ seat, onGo }) {
           ))}
         </div>
       )}
+
+      {/* Other writers' words, kept apart from the poems above and never
+          mixed in with them. No references are shown — see classics.js. */}
+      {classics.length ? (
+        <section className="classics" aria-labelledby="classics-title">
+          <header className="classics__head">
+            <span className="classics__rule" aria-hidden="true" />
+            <h2 className="classics__title" id="classics-title">
+              {meta.classicsTitle}
+            </h2>
+            <p className="classics__blurb">{meta.classicsBlurb}</p>
+          </header>
+          <div className="classics__list">
+            {classics.map((entry) => (
+              <ClassicCard entry={entry} seat={seat} key={entry.id} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <Interstitial />
 

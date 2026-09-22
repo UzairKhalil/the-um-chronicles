@@ -131,11 +131,156 @@
   letter-spacing: 0.2em;
 }
 
+/* ------------------------------------------- "Their Words, Our Story" */
+/* Other writers' words, kept apart from the owner's poems. No author or
+   source is shown on any card — that is deliberate, see classics.js. */
+
+.classics { margin-top: 3.2rem; }
+
+.classics__head {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.6rem;
+}
+
+.classics__rule {
+  width: 3.2rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+}
+
+.classics__title {
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 8vw, 2.2rem);
+  line-height: 1.35;
+  color: var(--rose);
+}
+
+.classics__blurb {
+  margin: 0;
+  font-style: italic;
+  color: var(--ink-faint);
+  font-size: 0.95rem;
+}
+
+.classics__list { display: grid; gap: 1.1rem; }
+
+.classic {
+  padding: 1.25rem 1.15rem 1rem;
+  display: grid;
+  gap: 0.9rem;
+  animation: riseIn 0.7s var(--ease) both;
+}
+
+.classic__body { display: grid; gap: 0.7rem; min-width: 0; }
+
+.classic__line { display: block; }
+
+/* When a line of verse wraps on a narrow phone, indent the wrapped part, as
+   printed poetry does, so it is not mistaken for a new line of the poem. */
+.classic__english .classic__line,
+.classic__roman .classic__line,
+.classic__urdu:not(.classic__couplet) .classic__line {
+  /* "inline-start" is the left in English and the right in Urdu */
+  padding-inline-start: 1.1em;
+  text-indent: -1.1em;
+}
+
+.classic__english {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.7;
+  color: rgba(243, 227, 214, 0.92);
+  overflow-wrap: break-word;
+}
+
+.classic__meaning {
+  margin: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-faint);
+}
+
+.classic__roman {
+  margin: 0;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--ink-dim);
+}
+
+/* Urdu: RTL on this element only, Nastaliq, generous line height, and NO
+   letter-spacing — it breaks the joining Nastaliq is made of. */
+.classic__urdu {
+  margin: 0;
+  font-family: var(--urdu);
+  font-size: 1.22rem;
+  line-height: 2.45;
+  letter-spacing: normal !important;
+  text-align: right;
+  color: var(--cream);
+  padding-bottom: 0.12em;
+}
+
+/* A couplet (sher): the two lines centred, as it is traditionally set. */
+.classic__couplet { text-align: center; font-size: 1.3rem; }
+
+/* Marks our own translation, so it is never taken for the original. */
+.classic__label {
+  margin: 0;
+  justify-self: end;
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+.classic__toggle {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-height: 2.4rem;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(18, 8, 16, 0.4);
+  color: var(--ink-dim);
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.classic__toggle:hover { color: var(--ink); border-color: var(--accent); }
+
+.classic__toggle-ur {
+  font-family: var(--urdu);
+  font-size: 0.9rem;
+  line-height: 1.9;
+  letter-spacing: normal;
+}
+
+@media (min-width: 40rem) {
+  .classic__urdu { font-size: 1.35rem; line-height: 2.5; }
+  .classic__couplet { font-size: 1.45rem; }
+}
+
 @media (min-width: 40rem) {
   .poem__line { font-size: 1.12rem; }
   .poem__body--urdu .poem__line { font-size: 1.45rem; line-height: 2.5; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .poem { animation: none; }
+  .poem, .classic { animation: none; }
 }

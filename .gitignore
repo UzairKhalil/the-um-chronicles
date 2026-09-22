@@ -8,3 +8,9 @@ public/version.json
 
 # dev-only scratch harness, never committed
 public/_devframe.html
+_preview-classics.html
+
+# Owner-only records that name authors and sources. Never commit:
+# no references for any quote or poem, and this repository is public.
+*.local.md
+um-chronicles-poems-prompt.md

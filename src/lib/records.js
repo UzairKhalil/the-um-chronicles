@@ -11,7 +11,8 @@
 //   reactions/{itemId}/g_{deviceId} the same, for a guest: one per device
 //   devices/{deviceId}              { firstAt, lastAt, lastPersonId, ...detail }
 //
-// itemId is 'poem:<poem id>' or 'quote:<quote key>'. Realtime Database keys
+// itemId is 'poem:<poem id>', 'classic:<classic id>' or 'quote:<quote key>'.
+// Realtime Database keys
 // may not contain . # $ [ ] or / — a colon is fine.
 // ---------------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ export const reactionKey = (person) => (person?.partner ? person.id : guestKey()
 const isGuestId = (personId) => byId(personId)?.partner === false
 
 export const poemItemId = (id) => `poem:${id}`
+export const classicItemId = (id) => `classic:${id}`
 export const quoteItemId = (key) => `quote:${key}`
 
 /** Remember a device in the summary table, and touch its last-seen. */

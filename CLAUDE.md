@@ -53,7 +53,8 @@ than hanging or failing quietly.
 ### Everything editable lives in `src/content/`
 
 `meta.js` (titles, labels, the "Since" line, the day time zone), `quotes.js`,
-`poems.js`, `people.js` (the two people, their codes, their accent colours).
+`poems.js`, `classics.js` (generated — see below), `people.js` (the two
+people, their codes, their accent colours).
 
 All of it compiles into the public JavaScript bundle. The gate keeps out a
 passer-by, not anyone who opens devtools.
@@ -89,6 +90,41 @@ belongs to (`u`, `m`); `g` is a guest.
 * Rule changes that widen who may write must be **published before** the
   code that uses them is deployed — otherwise the new writes are rejected and
   queue up. The rules are shared with another app: merge, never replace.
+
+### "Their Words, Our Story" — other writers' words
+
+`src/content/classics.js` holds love lines by other writers, shown on the
+poetry page **below the owner's own poems**, under their own heading, never
+mixed in with them. `ClassicCard.jsx` renders them.
+
+* **Originals are verbatim public-domain text.** Never rewrite, shorten,
+  modernise or "improve" one. **Never add modern song lyrics, film dialogue,
+  or poetry first published after 1929** — copyright. One couplet from the
+  original list was dropped for exactly this reason.
+* **The source of truth is `docs/classics-source.md`.** `classics.js` is
+  generated from it, never retyped. `classics.test.js` fails if any original,
+  Roman Urdu, meaning or translation differs from it by a single character.
+  To change or add an entry, change the docs file first.
+* **No references, for any quote or poem — not in the app, not in this
+  repository.** The owner's rule: no author, work, year or film on screen, in
+  `classics.js`, in the docs, in commit messages or anywhere else here, and
+  this repository is public. Ids come from the words of the text, never its
+  author. The provenance record — who wrote what, where, when, and why each
+  text is public domain — is kept only on the owner's computer, in
+  `docs/classics-provenance.local.md`, git-ignored with every `*.local.md`.
+  Never commit it. The words are not claimed as the owner's either: the
+  section heading says they are others'.
+* The tests enforce both halves: in CI, that only text fields exist anywhere;
+  where the local provenance file exists, that no author, work or film string
+  appears in the app file, the public docs, or the rendered page.
+* **Urdu translations are ours**, approved after a native reader checked
+  them, and are always labelled "Urdu translation" — never presented as the
+  original.
+* English cards toggle to the Urdu translation ("اردو میں دیکھیں / See in
+  Urdu"); Urdu cards toggle to Roman Urdu plus meaning ("See in English").
+  Urdu couplets stay as two lines, centred.
+* Comments and reactions work on each card, keyed `classic:<id>`. Never change
+  an id once anyone has commented on it.
 
 ### Urdu
 
