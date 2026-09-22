@@ -152,11 +152,22 @@ note icon in the bottom-right corner (`MusicToggle.jsx`) to mute or unmute.
   the rights to**: the site and repository are public. If the owner wants
   specific recordings, they must be licensed for this use, and it is his
   call, made explicitly.
-* **Volume** lives in `meta.js → music.volume`. 0.4 was measured in a real
-  browser by offline rendering: about −34 dB RMS, peak about 0.11, no
-  clipping — soft background, still audible on a phone speaker. 0.05, the
-  first attempt, measured −52 dB: effectively silent. Measure before
-  changing it; do not guess.
+* **Volume has nine levels**, stepped with − and + beside the note icon,
+  starting in the middle (5). Each device remembers its level
+  (`localStorage: umc.music.level`); pressing + while muted brings the music
+  back. `levelToGain()` in `music.js` sets the loudness: an even 2.25 dB per
+  step. Measured in a real browser by offline rendering:
+
+  | level | RMS    | peak  |
+  |-------|--------|-------|
+  | 1     | −32 dB | 0.13  |
+  | 5     | −24 dB | 0.34  |
+  | 9     | −15 dB | 0.88  |
+
+  Level 1 is the old fixed setting the owner found too quiet; level 9 is
+  near ordinary music; a limiter keeps it from clipping. (A first attempt at
+  a fixed 0.05 measured −52 dB: silent on a phone.) Measure before changing
+  any of this; do not guess.
 * **Browsers only allow sound after a gesture.** Typing the code on the gate
   primes the audio (`primeAudio()` in `Gate.jsx`). After a reload, the first
   touch anywhere starts it. The toggle starts and stops sound inside its own

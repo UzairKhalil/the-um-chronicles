@@ -17,7 +17,13 @@ vi.mock('./lib/music.js', async (importOriginal) => {
   const real = await importOriginal()
   return {
     ...real,
-    music: { start: vi.fn(() => true), stop: vi.fn(), prime: vi.fn(), isPlaying: vi.fn() },
+    music: {
+      start: vi.fn(() => true),
+      stop: vi.fn(),
+      prime: vi.fn(),
+      isPlaying: vi.fn(),
+      setLevel: vi.fn(),
+    },
     primeAudio: vi.fn(),
   }
 })
@@ -68,6 +74,49 @@ describe('background music', () => {
     render(<App />)
     expect(screen.getByRole('button', { name: 'Play the music' })).toBeInTheDocument()
     expect(music.start).not.toHaveBeenCalled()
+  })
+
+  it('starts in the middle of the volume range', () => {
+    signIn()
+    render(<App />)
+    expect(screen.getByRole('group', { name: 'Music, volume 5 of 9' })).toBeInTheDocument()
+  })
+
+  it('goes louder and softer a step at a time, and remembers it', async () => {
+    signIn()
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Louder' }))
+    await user.click(screen.getByRole('button', { name: 'Louder' }))
+    expect(music.setLevel).toHaveBeenLastCalledWith(7)
+    expect(localStorage.getItem('umc.music.level')).toBe('7')
+    expect(screen.getByRole('group', { name: 'Music, volume 7 of 9' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Softer' }))
+    expect(music.setLevel).toHaveBeenLastCalledWith(6)
+  })
+
+  it('stops at the ends: Softer at the quietest, Louder at the loudest', () => {
+    localStorage.setItem('umc.music.level', '1')
+    signIn()
+    const { unmount } = render(<App />)
+    expect(screen.getByRole('button', { name: 'Softer' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Louder' })).toBeEnabled()
+    unmount()
+
+    localStorage.setItem('umc.music.level', '9')
+    render(<App />)
+    expect(screen.getByRole('button', { name: 'Louder' })).toBeDisabled()
+  })
+
+  it('brings the music back when Louder is pressed while muted', async () => {
+    localStorage.setItem('umc.music', 'off')
+    signIn()
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Louder' }))
+    expect(music.start).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Mute the music' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('stops when the person signs out', async () => {

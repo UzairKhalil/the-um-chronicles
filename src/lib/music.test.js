@@ -7,6 +7,12 @@ import {
   loadMusicPref,
   saveMusicPref,
   musicSupported,
+  LEVELS,
+  DEFAULT_LEVEL,
+  levelToGain,
+  clampLevel,
+  loadMusicLevel,
+  saveMusicLevel,
 } from './music.js'
 import meta from '../content/meta.js'
 
@@ -37,7 +43,9 @@ function fakeContext() {
     state: 'running',
     destination: node(),
     createGain: () => ({ ...node(), gain: param(1) }),
-    createDynamicsCompressor: () => ({ ...node(), threshold: param(), ratio: param() }),
+    createDynamicsCompressor: () => ({
+      ...node(), threshold: param(), ratio: param(), knee: param(), attack: param(), release: param(),
+    }),
     createConvolver: () => ({ ...node(), buffer: null }),
     createBiquadFilter: () => ({ ...node(), type: '', frequency: param(), Q: param() }),
     createOscillator: () => {
@@ -96,23 +104,42 @@ describe('the pieces', () => {
 })
 
 describe('the player', () => {
-  it('fades in to the quiet volume in meta.js, and never above it', () => {
+  const withMaster = () => {
     const { ctx } = fakeContext()
-    const player = createMusic({ context: ctx })
-    // the master gain is the first gain node built
     const gains = []
     const orig = ctx.createGain
     ctx.createGain = () => { const g = orig(); gains.push(g); return g }
+    return { ctx, master: () => gains[0] } // the first gain node built
+  }
+
+  it('fades in to the chosen level, never above it, and out to silence', () => {
+    const { ctx, master } = withMaster()
+    const player = createMusic({ context: ctx, level: DEFAULT_LEVEL })
     player.start()
-    const master = gains[0]
-    expect(master.gain.value).toBe(meta.music.volume)
-    expect(Math.max(...master.gain.history)).toBeLessThanOrEqual(meta.music.volume)
-    // "Soft and low" — measured in a real browser at 0.4: about -34 dB RMS,
-    // peak about 0.11. Keep the setting in the band that stays background.
-    expect(meta.music.volume).toBeGreaterThanOrEqual(0.2)
-    expect(meta.music.volume).toBeLessThanOrEqual(0.6)
+    expect(master().gain.value).toBeCloseTo(levelToGain(DEFAULT_LEVEL))
+    expect(Math.max(...master().gain.history)).toBeLessThanOrEqual(levelToGain(DEFAULT_LEVEL) + 1e-9)
     player.stop()
-    expect(master.gain.value).toBe(0)
+    expect(master().gain.value).toBe(0)
+  })
+
+  it('glides to a new level while playing', () => {
+    const { ctx, master } = withMaster()
+    const player = createMusic({ context: ctx, level: 5 })
+    player.start()
+    player.setLevel(8)
+    expect(master().gain.value).toBeCloseTo(levelToGain(8))
+    player.setLevel(2)
+    expect(master().gain.value).toBeCloseTo(levelToGain(2))
+    player.stop()
+  })
+
+  it('keeps a level chosen while muted for the next start', () => {
+    const { ctx, master } = withMaster()
+    const player = createMusic({ context: ctx, level: 5 })
+    player.setLevel(7)
+    player.start()
+    expect(master().gain.value).toBeCloseTo(levelToGain(7))
+    player.stop()
   })
 
   it('opens each piece with harmony alone; the melody joins the second time round', () => {
@@ -180,6 +207,38 @@ describe('the player', () => {
     expect(player.start()).toBe(false)
     expect(() => player.stop()).not.toThrow()
     expect(player.prime()).toBe(false)
+  })
+})
+
+describe('volume levels', () => {
+  it('has nine, starting in the middle', () => {
+    expect(LEVELS).toBe(9)
+    expect(DEFAULT_LEVEL).toBe(5)
+    expect(loadMusicLevel()).toBe(5)
+  })
+
+  it('gets louder by the same step each time', () => {
+    const db = (l) => 20 * Math.log10(levelToGain(l))
+    for (let l = 2; l <= LEVELS; l += 1) expect(db(l) - db(l - 1)).toBeCloseTo(2.25)
+  })
+
+  it('starts its quietest at the old setting the owner found too low', () => {
+    expect(levelToGain(1)).toBeCloseTo(0.4, 2)
+    expect(levelToGain(DEFAULT_LEVEL)).toBeGreaterThan(levelToGain(1) * 2.5) // ~9 dB up
+    expect(levelToGain(LEVELS)).toBeLessThanOrEqual(3.2)
+  })
+
+  it('never goes past either end', () => {
+    expect(clampLevel(0)).toBe(1)
+    expect(clampLevel(99)).toBe(LEVELS)
+    expect(clampLevel('nonsense')).toBe(DEFAULT_LEVEL)
+  })
+
+  it('remembers the level on this device', () => {
+    saveMusicLevel(7)
+    expect(loadMusicLevel()).toBe(7)
+    saveMusicLevel(42)
+    expect(loadMusicLevel()).toBe(LEVELS)
   })
 })
 

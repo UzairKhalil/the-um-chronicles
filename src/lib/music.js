@@ -38,6 +38,46 @@ export function saveMusicPref(on) {
   }
 }
 
+// --- volume levels ---------------------------------------------------------
+// Nine steps, − and + in the corner, starting in the middle. Each step is the
+// same loudness change (2.25 dB), which is how ears hear "one step louder".
+// Level 1 is the old fixed setting the owner found too quiet (gain 0.4,
+// measured about −34 dB); level 5, the default, is about 9 dB above it;
+// level 9 is near ordinary music. A limiter keeps the top clean.
+export const LEVELS = meta.music?.levels ?? 9
+export const DEFAULT_LEVEL = meta.music?.defaultLevel ?? Math.ceil(LEVELS / 2)
+const QUIETEST_DB = -8 // gain ≈ 0.4
+const STEP_DB = 2.25
+const LEVEL_KEY = 'umc.music.level'
+
+export const clampLevel = (n) => {
+  const v = Math.round(Number(n))
+  if (!Number.isFinite(v)) return DEFAULT_LEVEL
+  return Math.min(LEVELS, Math.max(1, v))
+}
+
+/** Level 1…LEVELS to the master gain. */
+export const levelToGain = (level) =>
+  10 ** ((QUIETEST_DB + (clampLevel(level) - 1) * STEP_DB) / 20)
+
+export function loadMusicLevel() {
+  try {
+    const v = localStorage.getItem(LEVEL_KEY)
+    if (v != null) return clampLevel(v)
+  } catch {
+    /* storage blocked — use the default */
+  }
+  return DEFAULT_LEVEL
+}
+
+export function saveMusicLevel(level) {
+  try {
+    localStorage.setItem(LEVEL_KEY, String(clampLevel(level)))
+  } catch {
+    /* nothing to do */
+  }
+}
+
 /** MIDI note number to frequency in Hz. */
 export const mtof = (m) => 440 * 2 ** ((m - 69) / 12)
 
@@ -158,7 +198,8 @@ function makeImpulse(ctx, seconds) {
  * The player. `context` is for tests and offline rendering; normally a real
  * AudioContext is created on first use.
  */
-export function createMusic({ volume = meta.music?.volume ?? 0.4, context = null } = {}) {
+export function createMusic({ level = loadMusicLevel(), context = null } = {}) {
+  let volume = levelToGain(level)
   let ctx = context
   let master = null
   let bus = null
@@ -185,12 +226,20 @@ export function createMusic({ volume = meta.music?.volume ?? 0.4, context = null
     master = ctx.createGain()
     master.gain.value = 0
 
-    // Keep it gentle: a soft compressor, then out.
+    // Keep it gentle: a soft compressor, then a limiter so even the loudest
+    // level can never clip.
     const comp = ctx.createDynamicsCompressor()
     comp.threshold.value = -24
     comp.ratio.value = 3
+    const limiter = ctx.createDynamicsCompressor()
+    limiter.threshold.value = -3
+    limiter.knee.value = 0
+    limiter.ratio.value = 20
+    limiter.attack.value = 0.003
+    limiter.release.value = 0.25
     master.connect(comp)
-    comp.connect(ctx.destination)
+    comp.connect(limiter)
+    limiter.connect(ctx.destination)
 
     const reverb = ctx.createConvolver()
     reverb.buffer = makeImpulse(ctx, 3.2)
@@ -394,6 +443,18 @@ export function createMusic({ volume = meta.music?.volume ?? 0.4, context = null
     },
 
     isPlaying: () => playing,
+
+    /** Change the volume level; glides there if playing, else used on start. */
+    setLevel(next) {
+      volume = levelToGain(next)
+      if (!built || !playing) return
+      const now = ctx.currentTime
+      master.gain.cancelScheduledValues(now)
+      master.gain.setValueAtTime(master.gain.value, now)
+      master.gain.linearRampToValueAtTime(volume, now + 0.25)
+    },
+
+    getGain: () => volume,
 
     // For offline rendering and tests only.
     _renderAhead(seconds) {
