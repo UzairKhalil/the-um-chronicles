@@ -13,7 +13,9 @@ Three screens plus an admin page:
 | ------------ | ------------------------------------------------------- |
 | *(none)*     | The Sign — the daily shared gesture                     |
 | `#chronicle` | The record of days both people signed                   |
-| `#poems`     | The poetry page, English and Urdu                       |
+| `#poems`     | The poetry page, tab 1: the owner's own poems           |
+| `#quotes`    | The poetry page, tab 2: the owner's own short lines     |
+| `#words`     | The poetry page, tab 3: other writers' words            |
 | `#history`   | Admin only. No link to it exists anywhere in the UI.    |
 
 ## Decisions, and the traps behind them
@@ -93,9 +95,11 @@ belongs to (`u`, `m`); `g` is a guest.
 
 ### "Their Words, Our Story" — other writers' words
 
-`src/content/classics.js` holds love lines by other writers, shown on the
-poetry page **below the owner's own poems**, under their own heading, never
-mixed in with them. `ClassicCard.jsx` renders them.
+`src/content/classics.js` holds love lines by other writers. They live on
+their **own tab** of the poetry page ("Their Words", `#words`), under their
+own heading, never mixed in with the owner's poems (`#poems`) or the owner's
+own short lines (`#quotes`, the `sign` list in `quotes.js`). The three are
+separate on purpose — the owner asked for it. `ClassicCard.jsx` renders them.
 
 * **Originals are verbatim public-domain text.** Never rewrite, shorten,
   modernise or "improve" one. **Never add modern song lyrics, film dialogue,
@@ -120,11 +124,21 @@ mixed in with them. `ClassicCard.jsx` renders them.
 * **Urdu translations are ours**, approved after a native reader checked
   them, and are always labelled "Urdu translation" — never presented as the
   original.
-* English cards toggle to the Urdu translation ("اردو میں دیکھیں / See in
-  Urdu"); Urdu cards toggle to Roman Urdu plus meaning ("See in English").
-  Urdu couplets stay as two lines, centred.
+* Every bilingual card — each classic, and the owner's poems that have both
+  languages — has the same **English | Urdu tabs** (`LangTabs.jsx`), English
+  first, opening on the original language. On an English classic, Urdu shows
+  our labelled translation; on an Urdu classic, English shows Roman Urdu plus
+  meaning. Urdu couplets stay as two lines, centred.
+* Every card — poems, quotes, classics — has a **copy icon**
+  (`CopyButton.jsx`) that anyone may use, guests included. It copies exactly
+  the text on the open tab: a poem's title and lines, a quote, or a classic's
+  original / translation / Roman Urdu. Never the meaning line, never a
+  reference.
 * Comments and reactions work on each card, keyed `classic:<id>`. Never change
   an id once anyone has commented on it.
+* The owner's quotes are keyed by position, `quote:sign-<index>`. Reordering
+  or deleting lines in `quotes.js → sign` moves their comments onto a
+  different line — add new lines at the end.
 
 ### Urdu
 

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import Comments from './Comments.jsx'
+import LangTabs from './LangTabs.jsx'
+import CopyButton from './CopyButton.jsx'
 import { poemItemId } from '../lib/records.js'
 
 const isUrdu = (lang) => lang === 'ur'
@@ -46,55 +48,55 @@ export default function Poem({ poem, seat }) {
   const lines = both ? poem.body?.[lang] || [] : poem.body || []
   const urduTitle = isUrdu(lang)
 
+  // Copies the poem as shown: its title, then the lines, with stanza breaks
+  // kept as blank lines.
+  const copy = (
+    <CopyButton
+      label="Copy this poem"
+      getText={() => [title, '', ...lines].join('\n')}
+    />
+  )
+
+  const header = (
+    <header className="poem__head">
+      <h2
+        className={`poem__title${urduTitle ? ' poem__title--urdu' : ''}`}
+        {...(urduTitle ? { dir: 'rtl', lang: 'ur' } : {})}
+      >
+        {title}
+      </h2>
+      <div className="poem__meta tiny faint">
+        {poem.date ? <span>{poem.date}</span> : null}
+        {poem.dedication ? (
+          <span
+            className={`poem__ded${isUrdu(lang) ? ' poem__ded--urdu' : ''}`}
+            {...(isUrdu(lang) && /[؀-ۿ]/.test(poem.dedication)
+              ? { dir: 'rtl', lang: 'ur' }
+              : {})}
+          >
+            {poem.dedication}
+          </span>
+        ) : null}
+      </div>
+    </header>
+  )
+
   return (
     <article className="poem card">
-      <header className="poem__head">
-        <h2
-          className={`poem__title${urduTitle ? ' poem__title--urdu' : ''}`}
-          {...(urduTitle ? { dir: 'rtl', lang: 'ur' } : {})}
-        >
-          {title}
-        </h2>
-        <div className="poem__meta tiny faint">
-          {poem.date ? <span>{poem.date}</span> : null}
-          {poem.dedication ? (
-            <span
-              className={`poem__ded${isUrdu(lang) ? ' poem__ded--urdu' : ''}`}
-              {...(isUrdu(lang) && /[؀-ۿ]/.test(poem.dedication)
-                ? { dir: 'rtl', lang: 'ur' }
-                : {})}
-            >
-              {poem.dedication}
-            </span>
-          ) : null}
-        </div>
-
-        {both ? (
-          <div className="lang-toggle" role="group" aria-label="Language">
-            <button
-              type="button"
-              className={`lang-toggle__btn${lang === 'en' ? ' is-on' : ''}`}
-              onClick={() => setLang('en')}
-              aria-pressed={lang === 'en'}
-            >
-              English
-            </button>
-            <button
-              type="button"
-              className={`lang-toggle__btn lang-toggle__btn--urdu${
-                lang === 'ur' ? ' is-on' : ''
-              }`}
-              onClick={() => setLang('ur')}
-              aria-pressed={lang === 'ur'}
-              lang="ur"
-            >
-              اردو
-            </button>
-          </div>
-        ) : null}
-      </header>
-
-      <Body lines={lines} lang={lang} />
+      {/* A tool row at the top of the card, as on every card on this page:
+          the English | Urdu tabs when the poem has both, and the copy icon
+          at the end. The title comes below it. */}
+      {both ? (
+        <LangTabs value={lang} onChange={setLang} tools={copy} between={header}>
+          <Body lines={lines} lang={lang} />
+        </LangTabs>
+      ) : (
+        <>
+          <div className="card-tools card-tools--end">{copy}</div>
+          {header}
+          <Body lines={lines} lang={lang} />
+        </>
+      )}
 
       <Comments itemId={poemItemId(poem.id)} seat={seat} />
     </article>

@@ -55,8 +55,10 @@
 
 /* ------------------------------------------------------------- the toggle */
 
+/* English | Urdu tabs (LangTabs.jsx) — the same on every bilingual card. */
 .lang-toggle {
-  margin-top: 1rem;
+  justify-self: start;
+  width: fit-content;
   display: inline-flex;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -78,13 +80,7 @@
   transition: color 0.3s var(--ease), background-color 0.3s var(--ease);
 }
 
-.lang-toggle__btn--urdu {
-  font-family: var(--urdu);
-  font-size: 0.9rem;
-  letter-spacing: normal;
-  padding-block: 0.15rem 0.5rem;
-  line-height: 1.8;
-}
+/* The tabs sit inside a .card-tools row; see below. */
 
 .lang-toggle__btn.is-on {
   color: var(--night);
@@ -122,9 +118,98 @@
 
 .poem__body--urdu .poem__break { height: 1.3em; }
 
-/* ---------------------------------------------------------------- closing */
+/* ------------------------------------------------ Poems | Quotes | Their Words */
+/* Three separate tabs, each its own hash (#poems, #quotes, #words). */
 
-.closing-quote { margin-top: 0.6rem; padding: 1.4rem 1.2rem 1.1rem; }
+.section-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px;
+  margin: 0 0 1.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(18, 8, 16, 0.45);
+}
+
+.section-tabs__btn {
+  min-height: 2.6rem;
+  padding: 0.4rem 0.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-dim);
+  font-family: var(--serif);
+  /* one line per tab, even on a 360px phone */
+  white-space: nowrap;
+  font-size: clamp(0.84rem, 3.8vw, 0.98rem);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), background-color 0.3s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.section-tabs__btn:hover { color: var(--ink); }
+
+.section-tabs__btn.is-on {
+  color: var(--night);
+  background: linear-gradient(140deg, var(--rose), var(--gold));
+}
+
+.poetry__panel { display: grid; gap: 1.6rem; animation: fadeIn 0.5s var(--ease) both; }
+
+/* ----------------------------------------------------- the row on each card */
+/* Tabs on the left (when a card has two languages), copy icon at the end. */
+
+.card-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.card-tools--end { justify-content: flex-end; }
+
+.poem .card-tools { margin-bottom: 0.9rem; }
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 2.3rem;
+  min-height: 2.3rem;
+  padding: 0 0.6rem;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(18, 8, 16, 0.4);
+  color: var(--ink-faint);
+  font-family: var(--serif);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.copy-btn:hover { color: var(--ink); border-color: var(--line-strong); }
+
+.copy-btn.is-done { color: var(--accent); border-color: var(--accent); }
+
+.copy-btn__status:empty { display: none; }
+
+/* ---------------------------------------------------- your own short lines */
+
+.quote-cards { display: grid; gap: 1.1rem; }
+
+.quote-card {
+  padding: 0.9rem 1.15rem 1rem;
+  display: grid;
+  gap: 0.4rem;
+  animation: riseIn 0.7s var(--ease) both;
+}
+
+.quote-card__text { font-size: 1.15rem; padding: 0.2rem 0.3rem 0.4rem; }
 
 .poetry__foot {
   margin-top: 2.4rem;
@@ -135,7 +220,7 @@
 /* Other writers' words, kept apart from the owner's poems. No author or
    source is shown on any card — that is deliberate, see classics.js. */
 
-.classics { margin-top: 3.2rem; }
+.classics { margin-top: 0; }
 
 .classics__head {
   text-align: center;
@@ -242,35 +327,6 @@
   padding: 0.15rem 0.6rem;
 }
 
-.classic__toggle {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  min-height: 2.4rem;
-  padding: 0.3rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(18, 8, 16, 0.4);
-  color: var(--ink-dim);
-  font-family: var(--serif);
-  font-size: 0.85rem;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.classic__toggle:hover { color: var(--ink); border-color: var(--accent); }
-
-.classic__toggle-ur {
-  font-family: var(--urdu);
-  font-size: 0.9rem;
-  line-height: 1.9;
-  letter-spacing: normal;
-}
-
 @media (min-width: 40rem) {
   .classic__urdu { font-size: 1.35rem; line-height: 2.5; }
   .classic__couplet { font-size: 1.45rem; }
@@ -282,5 +338,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .poem, .classic { animation: none; }
+  .poem, .classic, .quote-card, .poetry__panel { animation: none; }
 }

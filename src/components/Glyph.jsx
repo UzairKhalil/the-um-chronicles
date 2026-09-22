@@ -12,6 +12,9 @@ const PATHS = {
   quill:
     'M4 20c6-1 10-4 13-9 1.6-2.7 2-5 2-5s-2.6.3-5.4 1.8C8.6 10.3 6 14 4 20ZM4 20l5-5',
   arrow: 'M15 5l-7 7 7 7',
+  copy:
+    'M9.5 8.5h9a1.5 1.5 0 0 1 1.5 1.5v9.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 8 19.5V10a1.5 1.5 0 0 1 1.5-1.5ZM5 15.5V5.5A1.5 1.5 0 0 1 6.5 4h9',
+  check: 'M5 12.5l4.5 4.5L19 7.5',
 }
 
 export default function Glyph({ name, size = 20, className = '', strokeWidth = 1.5 }) {

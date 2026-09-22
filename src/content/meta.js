@@ -18,7 +18,13 @@ export const meta = {
   // The button that opens the poetry page.
   poetryLabel: "Uzair's Love for Maryam",
 
-  // The section below the poems holding other writers' words (classics.js).
+  // The three tabs on the poetry page, kept separate: your poems, your own
+  // short lines, and other writers' words.
+  poemsTabLabel: 'Poems',
+  quotesTabLabel: 'Quotes',
+  classicsTabLabel: 'Their Words',
+
+  // The tab holding other writers' words (classics.js).
   // It is the only thing on screen saying the words are someone else's — no
   // author or source is shown on any card, by the owner's choice.
   classicsTitle: 'Their Words, Our Story',

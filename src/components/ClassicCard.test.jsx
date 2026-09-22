@@ -21,6 +21,35 @@ const seat = { id: 'u', partner: true, name: 'Uzair', admin: true }
 const english = classics.find((e) => e.lang === 'en' && e.original.includes('\n'))
 const urdu = classics.find((e) => e.lang === 'ur')
 
+const tabs = () => screen.getAllByRole('tab').map((t) => t.textContent)
+const selected = () => screen.getByRole('tab', { selected: true }).textContent
+
+describe('the tabs', () => {
+  it('are English then Urdu on every card, whatever its language', () => {
+    for (const entry of [english, urdu]) {
+      const { unmount } = render(<ClassicCard entry={entry} seat={seat} />)
+      expect(tabs()).toEqual(['English', 'Urdu'])
+      unmount()
+    }
+  })
+
+  it('open on the original language', () => {
+    const a = render(<ClassicCard entry={english} seat={seat} />)
+    expect(selected()).toBe('English')
+    a.unmount()
+    render(<ClassicCard entry={urdu} seat={seat} />)
+    expect(selected()).toBe('Urdu')
+  })
+
+  it('switch with the arrow keys too', async () => {
+    const user = userEvent.setup()
+    render(<ClassicCard entry={english} seat={seat} />)
+    screen.getByRole('tab', { name: 'English' }).focus()
+    await user.keyboard('{ArrowRight}')
+    expect(selected()).toBe('Urdu')
+  })
+})
+
 describe('an English card', () => {
   it('shows the original line by line, and its meaning', () => {
     const { container } = render(<ClassicCard entry={english} seat={seat} />)
@@ -29,16 +58,10 @@ describe('an English card', () => {
     expect(screen.getByText(english.meaning_en)).toBeInTheDocument()
   })
 
-  it('offers the Urdu, in both languages', () => {
-    render(<ClassicCard entry={english} seat={seat} />)
-    const toggle = screen.getByRole('button', { name: /see in urdu/i })
-    expect(within(toggle).getByText('اردو میں دیکھیں')).toHaveAttribute('dir', 'rtl')
-  })
-
   it('switches to our translation, labelled as a translation, right to left', async () => {
     const user = userEvent.setup()
     const { container } = render(<ClassicCard entry={english} seat={seat} />)
-    await user.click(screen.getByRole('button', { name: /see in urdu/i }))
+    await user.click(screen.getByRole('tab', { name: 'Urdu' }))
 
     expect(screen.getByText('Urdu translation')).toBeInTheDocument()
     const ur = container.querySelector('.classic__urdu')
@@ -53,8 +76,8 @@ describe('an English card', () => {
   it('switches back to English', async () => {
     const user = userEvent.setup()
     const { container } = render(<ClassicCard entry={english} seat={seat} />)
-    await user.click(screen.getByRole('button', { name: /see in urdu/i }))
-    await user.click(screen.getByRole('button', { name: /see in english/i }))
+    await user.click(screen.getByRole('tab', { name: 'Urdu' }))
+    await user.click(screen.getByRole('tab', { name: 'English' }))
     expect(container.querySelector('.classic__english')).not.toBeNull()
     expect(screen.queryByText('Urdu translation')).toBeNull()
   })
@@ -74,7 +97,7 @@ describe('an Urdu card', () => {
   it('switches to Roman Urdu and the meaning', async () => {
     const user = userEvent.setup()
     const { container } = render(<ClassicCard entry={urdu} seat={seat} />)
-    await user.click(screen.getByRole('button', { name: /see in english/i }))
+    await user.click(screen.getByRole('tab', { name: 'English' }))
     const roman = container.querySelector('.classic__roman')
     expect([...roman.querySelectorAll('.classic__line')].map((l) => l.textContent)).toEqual(
       urdu.roman.split('\n')
@@ -85,20 +108,21 @@ describe('an Urdu card', () => {
 })
 
 describe('the poetry page', () => {
-  it('puts the section below the owner’s poems, under its own heading', () => {
+  it('gives the owner’s bilingual poems the same English | Urdu tabs', async () => {
+    const user = userEvent.setup()
     const { container } = render(<Poetry seat={seat} onGo={() => {}} />)
-    const poems = container.querySelector('.poems')
-    const section = container.querySelector('.classics')
-    expect(section).not.toBeNull()
-    expect(within(section).getByRole('heading', { name: 'Their Words, Our Story' })).toBeInTheDocument()
-    // Document order: poems first, then the classics — never mixed together.
-    expect(poems.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(within(poems).queryAllByRole('article').some((a) => a.classList.contains('classic'))).toBe(false)
-    expect(section.querySelectorAll('.classic')).toHaveLength(classics.length)
+    const bilingual = [...container.querySelectorAll('.poem')].find((p) =>
+      p.querySelector('[role="tablist"]')
+    )
+    expect(bilingual).toBeTruthy()
+    const t = within(bilingual)
+    expect(t.getAllByRole('tab').map((x) => x.textContent)).toEqual(['English', 'Urdu'])
+    await user.click(t.getByRole('tab', { name: 'Urdu' }))
+    expect(bilingual.querySelector('.poem__body--urdu')).toHaveAttribute('dir', 'rtl')
   })
 
   it('renders each card from text fields only', () => {
-    const { container } = render(<Poetry seat={seat} onGo={() => {}} />)
+    const { container } = render(<Poetry seat={seat} onGo={() => {}} section="words" />)
     const cards = [...container.querySelectorAll('.classic')]
     expect(cards).toHaveLength(classics.length)
     for (const card of cards) {
@@ -109,7 +133,7 @@ describe('the poetry page', () => {
 
   // Names are known only where the local provenance record exists.
   it.skipIf(!hasProvenance())('shows no reference anywhere — no author, work or film', () => {
-    const { container } = render(<Poetry seat={seat} onGo={() => {}} />)
+    const { container } = render(<Poetry seat={seat} onGo={() => {}} section="words" />)
     const text = container.textContent
     for (const ref of readReferences()) expect(text, ref).not.toContain(ref)
   })

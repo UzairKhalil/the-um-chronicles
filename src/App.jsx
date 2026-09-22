@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Gate from './components/Gate.jsx'
 import SignScreen from './components/SignScreen.jsx'
 import Chronicle from './components/Chronicle.jsx'
-import Poetry from './components/Poetry.jsx'
+import Poetry, { isPoetrySection } from './components/Poetry.jsx'
 import History from './components/History.jsx'
 import Masthead from './components/Masthead.jsx'
 import meta from './content/meta.js'
@@ -63,7 +63,7 @@ export default function App() {
       ? 'history'
       : route === 'chronicle'
         ? 'chronicle'
-        : route === 'poems'
+        : isPoetrySection(route) // #poems, #quotes, #words
           ? 'poems'
           : 'sign'
 
@@ -87,7 +87,7 @@ export default function App() {
             <SignScreen seat={seat} onBusy={setBusy} onGo={go} />
           ) : null}
           {page === 'chronicle' ? <Chronicle seat={seat} onGo={go} /> : null}
-          {page === 'poems' ? <Poetry seat={seat} onGo={go} /> : null}
+          {page === 'poems' ? <Poetry seat={seat} onGo={go} section={route} /> : null}
         </main>
 
         <footer className="app__foot">
