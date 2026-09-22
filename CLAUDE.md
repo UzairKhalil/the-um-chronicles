@@ -140,6 +140,36 @@ separate on purpose — the owner asked for it. `ClassicCard.jsx` renders them.
   or deleting lines in `quotes.js → sign` moves their comments onto a
   different line — add new lines at the end.
 
+### Background music
+
+`src/lib/music.js` plays soft music while someone is signed in, with a round
+note icon in the bottom-right corner (`MusicToggle.jsx`) to mute or unmute.
+
+* **There are no recordings and no audio files.** The pieces are original
+  compositions written as notes in `music.js` and played live by the Web
+  Audio API — a soft piano-like voice over slow pads, with a small reverb.
+  **Never add recorded songs, film music or any audio file you do not have
+  the rights to**: the site and repository are public. If the owner wants
+  specific recordings, they must be licensed for this use, and it is his
+  call, made explicitly.
+* **Volume** lives in `meta.js → music.volume`. 0.4 was measured in a real
+  browser by offline rendering: about −34 dB RMS, peak about 0.11, no
+  clipping — soft background, still audible on a phone speaker. 0.05, the
+  first attempt, measured −52 dB: effectively silent. Measure before
+  changing it; do not guess.
+* **Browsers only allow sound after a gesture.** Typing the code on the gate
+  primes the audio (`primeAudio()` in `Gate.jsx`). After a reload, the first
+  touch anywhere starts it. The toggle starts and stops sound inside its own
+  click handler, because Safari refuses audio started even a moment later.
+* Music plays only while signed in, so it stops whenever a session ends —
+  including when the phone locks or the app is left. Each device remembers
+  its own mute choice (`localStorage: umc.music`).
+* Audio times must never be negative: the timing "looseness" is clamped at
+  zero. The test stand-in AudioContext is as strict as a browser and throws,
+  so a regression fails the tests.
+* iPhones: the side silent switch mutes web audio. Nothing in the page can
+  change that.
+
 ### Urdu
 
 * `dir="rtl" lang="ur"` goes on the poem element only, never on `<html>` — the

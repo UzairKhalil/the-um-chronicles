@@ -18,6 +18,17 @@ export const meta = {
   // The button that opens the poetry page.
   poetryLabel: "Uzair's Love for Maryam",
 
+  // Background music: original pieces played live in the browser (music.js).
+  // onByDefault  whether it plays on a device that has never chosen
+  // volume       0 to 1. 0.4 is soft background (measured about -34 dB,
+  //              well under ordinary music). 1 is the most it goes: still
+  //              gentle, never clipping. Below 0.2 a phone speaker barely
+  //              carries it.
+  music: {
+    onByDefault: true,
+    volume: 0.4,
+  },
+
   // The three tabs on the poetry page, kept separate: your poems, your own
   // short lines, and other writers' words.
   poemsTabLabel: 'Poems',

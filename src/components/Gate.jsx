@@ -3,6 +3,7 @@ import meta from '../content/meta.js'
 import { gate as gateQuotes } from '../content/quotes.js'
 import { byCode } from '../content/people.js'
 import { pick } from '../lib/pick.js'
+import { primeAudio } from '../lib/music.js'
 
 const LENGTH = 5
 
@@ -38,6 +39,9 @@ export default function Gate({ onEnter, status }) {
   }
 
   function onChange(e) {
+    // Typing is the gesture browsers require before sound may play; wake the
+    // audio now, silently, so the music can fade in once the door opens.
+    primeAudio()
     const next = e.target.value.replace(/\D/g, '').slice(0, LENGTH)
     setCode(next)
     if (error) setError('')

@@ -12,6 +12,8 @@ import { useDbStatus } from './hooks/useDb.js'
 import useHashRoute from './hooks/useHashRoute.js'
 import useSessionExpiry from './hooks/useSessionExpiry.js'
 import { watchForNewBuild } from './lib/version.js'
+import { music, loadMusicPref, saveMusicPref } from './lib/music.js'
+import MusicToggle from './components/MusicToggle.jsx'
 
 export default function App() {
   const [seat, setSeat] = useState(loadSeat)
@@ -53,7 +55,29 @@ export default function App() {
   // covered by the seat living in sessionStorage — see lib/session.js.
   useSessionExpiry({ active: Boolean(seat), onExpire: leave })
 
+  // Soft background music while someone is signed in, if this device wants
+  // it. It stops on the code screen, so it also stops whenever a session
+  // expires — including when the phone is locked or the app is left.
+  const [musicOn, setMusicOn] = useState(loadMusicPref)
+  useEffect(() => {
+    if (seat && musicOn) music.start()
+    else music.stop()
+  }, [seat, musicOn])
+  useEffect(() => () => music.stop(), [])
+
+  // Start or stop the sound INSIDE the tap: Safari refuses audio started
+  // even a moment after the gesture. The effect above then agrees with it.
+  const toggleMusic = useCallback(() => {
+    const next = !musicOn
+    saveMusicPref(next)
+    if (next) music.start()
+    else music.stop()
+    setMusicOn(next)
+  }, [musicOn])
+
   if (!seat) return <Gate onEnter={enter} status={status} />
+
+  const musicButton = <MusicToggle on={musicOn} onToggle={toggleMusic} />
 
   // #history is Uzair's alone, and is reachable only by typing it. Anyone else
   // who lands on that address simply gets the normal app — no button, no
@@ -68,7 +92,12 @@ export default function App() {
           : 'sign'
 
   if (page === 'history') {
-    return <History seat={seat} onClose={() => go('')} />
+    return (
+      <>
+        <History seat={seat} onClose={() => go('')} />
+        {musicButton}
+      </>
+    )
   }
 
   return (
@@ -96,6 +125,7 @@ export default function App() {
           </p>
         </footer>
       </div>
+      {musicButton}
     </div>
   )
 }
