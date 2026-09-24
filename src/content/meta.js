@@ -15,6 +15,10 @@ export const meta = {
   // Anything works: 'Since 14 March 2021', 'Since the winter of 2019'.
   since: 'Since 24 March 2024',
 
+  // The same day, as a date, so the app can count from it. Leave it empty to
+  // show no count. Format: YYYY-MM-DD.
+  sinceDate: '2024-03-24',
+
   // The button that opens the poetry page.
   poetryLabel: "Uzair's Love for Maryam",
 
@@ -40,6 +44,16 @@ export const meta = {
   // author or source is shown on any card, by the owner's choice.
   classicsTitle: 'Their Words, Our Story',
   classicsBlurb: 'Lines others wrote long ago, that say it too.',
+
+  // The admin history page (#history).
+  // signInDays  how far back the sign-ins table reaches. Older sign-ins are
+  //             still stored; they are simply not listed.
+  // pageSize    rows per page to start with; pageSizes fills the chooser.
+  history: {
+    signInDays: 3,
+    pageSize: 10,
+    pageSizes: [10, 15, 20, 50],
+  },
 
   // A shared ritual needs one shared idea of "today", or two phones in two
   // countries disagree about whether a day counted. Every day boundary in the

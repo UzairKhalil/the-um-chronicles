@@ -54,7 +54,8 @@ than hanging or failing quietly.
 
 ### Everything editable lives in `src/content/`
 
-`meta.js` (titles, labels, the "Since" line, the day time zone), `quotes.js`,
+`meta.js` (titles, labels, the "Since" line and `sinceDate` it is counted
+from, the day time zone, music, history paging), `quotes.js`,
 `poems.js`, `classics.js` (generated — see below), `people.js` (the two
 people, their codes, their accent colours).
 
@@ -140,6 +141,15 @@ separate on purpose — the owner asked for it. `ClassicCard.jsx` renders them.
   or deleting lines in `quotes.js → sign` moves their comments onto a
   different line — add new lines at the end.
 
+### How long it has been
+
+Under the "Since …" line on the Sign screen, `lib/since.js` counts from
+`meta.sinceDate` (a real date, beside the free-text `meta.since`) to today on
+the server's clock: "Two years and six months — 914 days, and still
+counting." Whole months are stepped first and clamped, so 31 January to
+1 March is one month and one day, never a negative. An empty or future date
+shows nothing at all.
+
 ### Background music
 
 `src/lib/music.js` plays soft music while someone is signed in, with a round
@@ -196,6 +206,26 @@ message, no hint. There is no button to it anywhere.
 Tables scroll sideways inside `.hbox`; the page itself never scrolls sideways
 (`overflow-x: hidden` on `html, body` in `global.css`). The first column of
 every table is `position: sticky; left: 0`.
+
+**Devices seen comes first** — the owner cares most about it — and is built by
+`lib/devicesReport.js`, not read straight from `/umc/devices`. Every sign-in,
+comment and reaction carries the device snapshot of its moment, so the report
+merges all of them: a device that never reached the devices table still
+appears, details come from the most recent snapshot rather than a stale row,
+first and last seen span everything known, and sign-ins, comments and
+reactions are counted per device. `actions` is the devices row's own counter:
+every action ever, including ones whose sign-in record has been trimmed.
+
+An iPhone never reports its model, so the report infers a **likely** model
+from screen size and pixel density (`APPLE_SCREENS`), which narrows it to a
+group, never one model. It is always labelled "(likely)". Android reports a
+real model. Add new screen sizes to that table as phones appear.
+
+**Sign-ins are limited and paged.** They grow fastest, so the table shows only
+`meta.history.signInDays` (3) and pages at `meta.history.pageSize` (10), with
+`pageSizes` in the chooser (`Pager.jsx`). Older sign-ins are still stored —
+the note says how many — and every device's full total stays in the devices
+table above.
 
 ### What a browser will and will not report
 

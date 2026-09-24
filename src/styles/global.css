@@ -133,6 +133,18 @@ a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset:
   color: var(--ink-faint);
 }
 
+/* How long it has been, under the "Since …" line. */
+.since-count {
+  margin: 0.5rem auto 0;
+  max-width: 22rem;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--rose);
+  opacity: 0.88;
+  text-wrap: balance;
+}
+
 .section-title {
   font-size: 1.5rem;
   letter-spacing: 0.06em;

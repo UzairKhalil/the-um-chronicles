@@ -1,4 +1,5 @@
 import meta from '../content/meta.js'
+import { sinceLine } from '../lib/since.js'
 
 const LABELS = {
   sign: null,
@@ -8,6 +9,8 @@ const LABELS = {
 
 export default function Masthead({ seat, status, page, onHome, onLeave }) {
   const sub = LABELS[page]
+  // How long it has been, counted from meta.sinceDate on the server's clock.
+  const count = sinceLine()
 
   return (
     <header className="masthead">
@@ -21,7 +24,12 @@ export default function Masthead({ seat, status, page, onHome, onLeave }) {
         <span className="subtitle">{meta.subtitle}</span>
       </button>
 
-      {page === 'sign' ? <p className="since">{meta.since}</p> : null}
+      {page === 'sign' ? (
+        <>
+          <p className="since">{meta.since}</p>
+          {count ? <p className="since-count">{count}</p> : null}
+        </>
+      ) : null}
       {sub ? <p className="masthead__page eyebrow">{sub}</p> : null}
 
       <div className="masthead__row">

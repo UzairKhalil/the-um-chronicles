@@ -140,3 +140,62 @@
 }
 
 .history__foot p { margin: 0; text-wrap: pretty; }
+
+/* ---------------------------------------------------------------- paging */
+/* Above the table, so the controls are reachable without scrolling to the
+   end of a long one. */
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.7rem;
+}
+
+.pager__size { display: inline-flex; align-items: center; gap: 0.45rem; }
+
+.pager__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.pager__select {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: rgba(18, 8, 16, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  padding: 0.3rem 0.5rem;
+  min-height: 2.2rem;
+}
+
+.pager__count { margin-right: auto; letter-spacing: 0.08em; }
+
+.pager__moves { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+.pager__btn {
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(18, 8, 16, 0.6);
+  color: var(--ink-dim);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.pager__btn:hover:not(:disabled) { color: var(--ink); border-color: var(--line-strong); }
+.pager__btn:disabled { opacity: 0.35; cursor: default; }
+
+.pager__page {
+  min-width: 3.2rem;
+  text-align: center;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
